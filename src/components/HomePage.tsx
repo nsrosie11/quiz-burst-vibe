@@ -61,60 +61,51 @@ const HomePage = ({ onStartQuiz }: HomePageProps) => {
         </Card>
       </div>
 
-      {/* Game Modes */}
+      {/* Daily Recommendation */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">Choose Your Mode</h2>
-        <div className="space-y-3">
-          <Button 
-            variant="quiz" 
-            size="quiz" 
-            className="w-full justify-between"
-            onClick={() => onStartQuiz('solo')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-lg">Solo Mode</p>
-                <p className="text-sm opacity-90">Practice on your own</p>
-              </div>
+        <div className="flex items-center gap-2">
+          <Star className="w-6 h-6 text-quiz-yellow" />
+          <h2 className="text-2xl font-bold text-foreground">Rekomendasi Hari Ini</h2>
+        </div>
+        
+        <Card className="p-6 bg-gradient-to-br from-quiz-purple to-quiz-pink border-0 shadow-quiz">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 bg-quiz-yellow rounded-2xl flex items-center justify-center shadow-quiz flex-shrink-0">
+              <Calculator className="w-8 h-8 text-white" />
             </div>
-            <Badge className="bg-quiz-yellow text-quiz-yellow-foreground">New</Badge>
-          </Button>
-
-          <Button 
-            variant="secondary" 
-            size="quiz" 
-            className="w-full justify-between"
-            onClick={() => onStartQuiz('multiplayer')}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-quiz-purple rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+            <div className="flex-1 space-y-3">
+              <div>
+                <p className="text-white font-semibold text-lg">Kerjain Matematika yuk!</p>
+                <p className="text-white/80 text-sm">Lagi banyak yang main kategori ini hari ini. Kesempatan bagus buat naik rank! 🚀</p>
               </div>
-              <div className="text-left">
-                <p className="font-bold text-lg">Multiplayer</p>
-                <p className="text-sm text-muted-foreground">Play with friends</p>
-              </div>
+              <Button 
+                variant="quiz"
+                className="bg-quiz-yellow hover:bg-quiz-yellow/90 text-quiz-yellow-foreground font-bold"
+                onClick={() => onStartQuiz('solo', 'math')}
+              >
+                Mulai Sekarang
+              </Button>
             </div>
-          </Button>
+          </div>
+        </Card>
 
+        {/* Quick Access Modes */}
+        <div className="grid grid-cols-2 gap-3">
           <Button 
             variant="outline" 
-            size="quiz" 
-            className="w-full justify-between"
+            className="h-16 flex-col gap-1"
+            onClick={() => onStartQuiz('multiplayer')}
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-sm font-medium">Multiplayer</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-16 flex-col gap-1"
             onClick={() => onStartQuiz('1v1')}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-quiz-pink rounded-full flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-lg">1v1 Mode</p>
-                <p className="text-sm text-muted-foreground">Challenge a player</p>
-              </div>
-            </div>
+            <Trophy className="w-5 h-5" />
+            <span className="text-sm font-medium">1v1 Mode</span>
           </Button>
         </div>
       </div>
