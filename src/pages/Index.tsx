@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trophy } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import AuthPage from "./AuthPage";
 import HomePage from "@/components/HomePage";
 import QuizInterface from "@/components/QuizInterface";
 import LeaderboardPage from "@/components/LeaderboardPage";
@@ -10,11 +12,29 @@ import CategoryLevelsPage from "@/components/CategoryLevelsPage";
 type AppState = "home" | "quiz" | "leaderboard" | "summary" | "categoryLevels";
 
 const Index = () => {
+  const { user, profile, loading, isAuthenticated } = useAuth();
   const [currentScreen, setCurrentScreen] = useState<AppState>("home");
   const [quizScore, setQuizScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<{id: string, name: string, icon: string} | null>(null);
   const [currentCategory, setCurrentCategory] = useState<string>("random");
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-quiz-bg-gradient flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-quiz-purple rounded-full flex items-center justify-center mx-auto animate-pulse">
+            <Trophy className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-foreground">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPage onAuthSuccess={() => setCurrentScreen("home")} />;
+  }
 
   const handleStartQuiz = (mode: string, category?: string) => {
     if (category && mode === 'solo') {
@@ -105,7 +125,7 @@ const Index = () => {
 
   return (
     <div className="relative">
-      <HomePage onStartQuiz={handleStartQuiz} />
+      <HomePage onStartQuiz={handleStartQuiz} userName={profile?.display_name || user?.email?.split('@')[0] || "Player"} />
       
       {/* Floating Leaderboard Button */}
       <div className="fixed bottom-6 right-6 z-50">
