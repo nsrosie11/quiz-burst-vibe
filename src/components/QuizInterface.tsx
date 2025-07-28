@@ -14,47 +14,216 @@ interface Question {
 interface QuizInterfaceProps {
   onQuizComplete: (score: number, totalQuestions: number) => void;
   onBack: () => void;
+  category?: string;
 }
 
-const QuizInterface = ({ onQuizComplete, onBack }: QuizInterfaceProps) => {
+const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInterfaceProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
 
-  const questions: Question[] = [
-    {
-      id: 1,
-      question: "What is the capital of France?",
-      options: ["London", "Berlin", "Paris", "Madrid"],
-      correctAnswer: 2
-    },
-    {
-      id: 2,
-      question: "What is 2 + 2?",
-      options: ["3", "4", "5", "6"],
-      correctAnswer: 1
-    },
-    {
-      id: 3,
-      question: "Which planet is closest to the Sun?",
-      options: ["Venus", "Mercury", "Earth", "Mars"],
-      correctAnswer: 1
-    },
-    {
-      id: 4,
-      question: "Who wrote Romeo and Juliet?",
-      options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
-      correctAnswer: 1
-    },
-    {
-      id: 5,
-      question: "What is the largest ocean on Earth?",
-      options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-      correctAnswer: 3
-    }
-  ];
+  const getQuestionsByCategory = (cat: string): Question[] => {
+    const questionBank = {
+      math: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 15 × 8?",
+          options: ["120", "125", "115", "130"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Jika x + 12 = 20, maka x = ?",
+          options: ["6", "8", "10", "12"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapakah akar kuadrat dari 144?",
+          options: ["10", "11", "12", "13"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Hasil dari 3² + 4² = ?",
+          options: ["25", "24", "26", "23"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Berapa persen dari 25% × 80?",
+          options: ["15", "20", "25", "30"],
+          correctAnswer: 1
+        }
+      ],
+      history: [
+        {
+          id: 1,
+          question: "Siapa proklamator kemerdekaan Indonesia?",
+          options: ["Soekarno-Hatta", "Soeharto", "Habibie", "Megawati"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Kapan Indonesia merdeka?",
+          options: ["16 Agustus 1945", "17 Agustus 1945", "18 Agustus 1945", "15 Agustus 1945"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Siapa nama pahlawan wanita dari Aceh?",
+          options: ["Kartini", "Cut Nyak Dien", "Dewi Sartika", "Martha Christina Tiahahu"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Kerajaan Majapahit terletak di provinsi?",
+          options: ["Jawa Tengah", "Jawa Barat", "Jawa Timur", "Yogyakarta"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        }
+      ],
+      sports: [
+        {
+          id: 1,
+          question: "Berapa pemain dalam satu tim sepak bola?",
+          options: ["10", "11", "12", "9"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Olahraga bulu tangkis berasal dari negara?",
+          options: ["Indonesia", "China", "Inggris", "India"],
+          correctAnswer: 2
+        },
+        {
+          id: 3,
+          question: "Siapa atlet bulutangkis Indonesia yang paling terkenal?",
+          options: ["Taufik Hidayat", "Susi Susanti", "Liem Swie King", "Semua benar"],
+          correctAnswer: 3
+        },
+        {
+          id: 4,
+          question: "Berapa set maksimal dalam pertandingan tenis?",
+          options: ["3", "4", "5", "6"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Olimpiade modern pertama diadakan di?",
+          options: ["Paris", "London", "Athena", "Roma"],
+          correctAnswer: 2
+        }
+      ],
+      science: [
+        {
+          id: 1,
+          question: "Apa rumus kimia air?",
+          options: ["H2O", "CO2", "O2", "H2SO4"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Planet terdekat dengan matahari adalah?",
+          options: ["Venus", "Merkurius", "Bumi", "Mars"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Organ terbesar dalam tubuh manusia adalah?",
+          options: ["Hati", "Paru-paru", "Kulit", "Ginjal"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Siapa penemu listrik?",
+          options: ["Thomas Edison", "Benjamin Franklin", "Nikola Tesla", "Michael Faraday"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Proses fotosintesis terjadi di bagian?",
+          options: ["Akar", "Batang", "Daun", "Bunga"],
+          correctAnswer: 2
+        }
+      ],
+      general: [
+        {
+          id: 1,
+          question: "Ibu kota Indonesia adalah?",
+          options: ["Surabaya", "Jakarta", "Bandung", "Medan"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Hewan terbesar di dunia adalah?",
+          options: ["Gajah", "Paus Biru", "Jerapah", "Hiu"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa benua di dunia?",
+          options: ["5", "6", "7", "8"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Mata uang Indonesia adalah?",
+          options: ["Ringgit", "Rupiah", "Dong", "Baht"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Negara dengan populasi terbesar di dunia?",
+          options: ["India", "China", "Amerika", "Indonesia"],
+          correctAnswer: 1
+        }
+      ],
+      random: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 12 + 8?",
+          options: ["18", "20", "22", "24"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa pemain dalam tim basket?",
+          options: ["4", "5", "6", "7"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Apa rumus kimia garam?",
+          options: ["NaCl", "H2O", "CO2", "O2"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Negara terkecil di dunia adalah?",
+          options: ["Monaco", "Vatikan", "San Marino", "Liechtenstein"],
+          correctAnswer: 1
+        }
+      ]
+    };
+    
+    return questionBank[cat as keyof typeof questionBank] || questionBank.random;
+  };
+
+  const questions = getQuestionsByCategory(category);
 
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;

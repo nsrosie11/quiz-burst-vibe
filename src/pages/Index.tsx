@@ -14,15 +14,18 @@ const Index = () => {
   const [quizScore, setQuizScore] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<{id: string, name: string, icon: string} | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<string>("random");
 
   const handleStartQuiz = (mode: string, category?: string) => {
     if (category && mode === 'solo') {
       // Navigate to category levels page
       const categoryData = getCategoryData(category);
       setSelectedCategory(categoryData);
+      setCurrentCategory(category);
       setCurrentScreen("categoryLevels");
     } else {
       console.log(`Starting ${mode} quiz`, category ? `in ${category} category` : "");
+      setCurrentCategory(category || "random");
       setCurrentScreen("quiz");
     }
   };
@@ -41,6 +44,7 @@ const Index = () => {
 
   const handleStartLevel = (categoryId: string, levelId: number) => {
     console.log(`Starting level ${levelId} in ${categoryId} category`);
+    setCurrentCategory(categoryId);
     setCurrentScreen("quiz");
   };
 
@@ -67,6 +71,7 @@ const Index = () => {
       <QuizInterface 
         onQuizComplete={handleQuizComplete}
         onBack={handleBackToHome}
+        category={currentCategory}
       />
     );
   }

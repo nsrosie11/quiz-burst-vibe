@@ -89,25 +89,6 @@ const HomePage = ({ onStartQuiz }: HomePageProps) => {
           </div>
         </Card>
 
-        {/* Quick Access Modes */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline" 
-            className="h-16 flex-col gap-1"
-            onClick={() => onStartQuiz('multiplayer')}
-          >
-            <Users className="w-5 h-5" />
-            <span className="text-sm font-medium">Multiplayer</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-16 flex-col gap-1"
-            onClick={() => onStartQuiz('1v1')}
-          >
-            <Trophy className="w-5 h-5" />
-            <span className="text-sm font-medium">1v1 Mode</span>
-          </Button>
-        </div>
       </div>
 
       {/* Categories */}
