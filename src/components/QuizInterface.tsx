@@ -275,7 +275,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   };
 
   return (
-    <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
+    <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between pt-8">
         <Button variant="ghost" onClick={onBack}>
@@ -283,7 +283,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
         </Button>
         <div className="flex items-center gap-2 text-foreground">
           <Clock className="w-5 h-5" />
-          <span className="text-lg font-bold">{timeLeft}s</span>
+          <span className="text-lg font-nunito font-bold">{timeLeft}s</span>
         </div>
       </div>
 
@@ -297,8 +297,8 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
       </div>
 
       {/* Question */}
-      <Card className="p-6 bg-card shadow-quiz border-0">
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+      <Card className="p-6 bg-card">
+        <h2 className="text-2xl font-fredoka font-semibold text-foreground mb-6">
           {currentQ.question}
         </h2>
         
@@ -312,7 +312,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
               disabled={showFeedback}
             >
               <div className="flex items-center justify-between w-full">
-                <span className="text-lg">{option}</span>
+                <span className="text-lg font-nunito">{option}</span>
                 {showFeedback && (
                   <>
                     {index === currentQ.correctAnswer && (
@@ -333,7 +333,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
       {showFeedback && (
         <div className="flex justify-center">
           <Button 
-            variant="quiz" 
+            variant="mejakia" 
             size="lg" 
             onClick={handleNext}
             className="w-full max-w-xs"
@@ -352,10 +352,10 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
 
       {/* Score Display */}
       <div className="fixed bottom-4 left-4">
-        <Card className="p-3 bg-card shadow-quiz border-0">
+        <Card className="p-3 bg-card">
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Score</p>
-            <p className="text-2xl font-bold text-foreground">{score}</p>
+            <p className="text-sm font-nunito text-muted-foreground">Score</p>
+            <p className="text-2xl font-nunito font-bold text-foreground">{score}</p>
           </div>
         </Card>
       </div>

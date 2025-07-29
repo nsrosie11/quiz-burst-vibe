@@ -21,12 +21,12 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-quiz-bg-gradient flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 bg-quiz-purple rounded-full flex items-center justify-center mx-auto animate-pulse">
+          <div className="w-16 h-16 bg-mejakia-gradient rounded-xl flex items-center justify-center mx-auto animate-pulse">
             <Trophy className="w-8 h-8 text-white" />
           </div>
-          <p className="text-foreground">Memuat...</p>
+          <p className="text-foreground font-nunito">Memuat...</p>
         </div>
       </div>
     );
@@ -130,9 +130,9 @@ const Index = () => {
       {/* Floating Leaderboard Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Button 
-          variant="quiz" 
+          variant="mejakia" 
           size="icon"
-          className="w-16 h-16 rounded-full shadow-glow"
+          className="w-16 h-16 rounded-xl"
           onClick={handleShowLeaderboard}
         >
           <Trophy className="w-8 h-8" />

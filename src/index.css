@@ -8,48 +8,56 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 248 100% 98%;
-    --foreground: 258 15% 15%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 258 15% 15%;
+    --card-foreground: 0 0% 3.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 258 15% 15%;
+    --popover-foreground: 0 0% 3.9%;
 
-    --primary: 261 74% 67%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 7 70% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 325 84% 80%;
-    --secondary-foreground: 258 15% 15%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 261 20% 95%;
-    --muted-foreground: 258 15% 60%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 51 100% 70%;
-    --accent-foreground: 258 15% 15%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 261 20% 90%;
-    --input: 261 20% 95%;
-    --ring: 261 74% 67%;
+    --border: 220 13% 91%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 7 70% 60%;
 
-    --success: 142 72% 50%;
-    --success-foreground: 0 0% 100%;
+    --success: 142 76% 36%;
+    --success-foreground: 355.7 100% 97.3%;
 
-    --warning: 45 93% 58%;
-    --warning-foreground: 258 15% 15%;
+    --warning: 32 95% 44%;
+    --warning-foreground: 0 0% 3.9%;
 
-    --quiz-purple: 261 74% 67%;
-    --quiz-pink: 325 84% 80%;
-    --quiz-yellow: 51 100% 70%;
-    --quiz-gradient: linear-gradient(135deg, hsl(261 74% 67%), hsl(325 84% 80%));
-    --quiz-bg-gradient: linear-gradient(180deg, hsl(248 100% 98%), hsl(261 20% 95%));
-
-    --shadow-quiz: 0 8px 32px -4px hsl(261 74% 67% / 0.3);
-    --shadow-glow: 0 0 20px hsl(261 74% 67% / 0.4);
+    /* MejaKita brand colors */
+    --mejakia-primary: 7 70% 60%;
+    --mejakia-primary-dark: 7 70% 45%;
+    --mejakia-shadow: 7 70% 35%;
+    --mejakia-shadow-hover: 7 70% 25%;
+    
+    /* MejaKita gradients */
+    --mejakia-gradient: linear-gradient(90deg, #E36559 0%, #C34141 100%);
+    --mejakia-gradient-hover: linear-gradient(90deg, #C34141, #A32C35);
+    
+    /* Background */
+    --mejakia-bg: 0 0% 100%;
+    
+    /* Shadows */
+    --shadow-mejakia: 0 4px 0 #A32C35;
+    --shadow-mejakia-hover: 0 4px 0 #831C2C;
 
     --radius: 1rem;
 

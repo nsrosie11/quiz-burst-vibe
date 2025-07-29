@@ -60,10 +60,11 @@ export default {
 					DEFAULT: 'hsl(var(--warning))',
 					foreground: 'hsl(var(--warning-foreground))'
 				},
-				quiz: {
-					purple: 'hsl(var(--quiz-purple))',
-					pink: 'hsl(var(--quiz-pink))',
-					yellow: 'hsl(var(--quiz-yellow))'
+				mejakia: {
+					primary: 'hsl(var(--mejakia-primary))',
+					'primary-dark': 'hsl(var(--mejakia-primary-dark))',
+					shadow: 'hsl(var(--mejakia-shadow))',
+					'shadow-hover': 'hsl(var(--mejakia-shadow-hover))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -77,12 +78,16 @@ export default {
 				}
 			},
 			backgroundImage: {
-				'quiz-gradient': 'var(--quiz-gradient)',
-				'quiz-bg-gradient': 'var(--quiz-bg-gradient)'
+				'mejakia-gradient': 'var(--mejakia-gradient)',
+				'mejakia-gradient-hover': 'var(--mejakia-gradient-hover)'
 			},
 			boxShadow: {
-				'quiz': 'var(--shadow-quiz)',
-				'glow': 'var(--shadow-glow)'
+				'mejakia': 'var(--shadow-mejakia)',
+				'mejakia-hover': 'var(--shadow-mejakia-hover)'
+			},
+			fontFamily: {
+				'fredoka': ['Fredoka', 'cursive'],
+				'nunito': ['Nunito', 'sans-serif']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

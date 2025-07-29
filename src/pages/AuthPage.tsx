@@ -114,24 +114,24 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-quiz-bg-gradient flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Brain className="w-16 h-16 text-quiz-purple mx-auto animate-pulse" />
-          <p className="text-foreground">Memuat...</p>
+          <Brain className="w-16 h-16 text-mejakia-primary mx-auto animate-pulse" />
+          <p className="text-foreground font-nunito">Memuat...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-quiz-bg-gradient flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-8 bg-card shadow-quiz border-0">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md p-8 bg-card">
         <div className="text-center space-y-2 mb-8">
-          <div className="w-20 h-20 bg-quiz-purple rounded-2xl flex items-center justify-center mx-auto shadow-quiz">
+          <div className="w-20 h-20 bg-mejakia-gradient rounded-xl flex items-center justify-center mx-auto">
             <Brain className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Quiz App</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-fredoka font-semibold text-foreground">MejaKita Quiz</h1>
+          <p className="text-muted-foreground font-nunito">
             {isLogin ? "Masuk ke akun Anda" : "Buat akun baru"}
           </p>
         </div>
@@ -195,7 +195,7 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
 
           <Button
             type="submit"
-            variant="quiz"
+            variant="mejakia"
             size="lg"
             className="w-full h-12"
             disabled={loading}

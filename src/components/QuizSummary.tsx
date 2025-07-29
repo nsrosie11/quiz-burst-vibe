@@ -45,21 +45,21 @@ const QuizSummary = ({ score, totalQuestions, onPlayAgain, onBackToHome }: QuizS
   };
 
   return (
-    <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
+    <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
       <div className="text-center pt-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Quiz Complete!</h1>
-        <p className="text-lg text-muted-foreground">Here's how you did</p>
+        <h1 className="text-3xl font-fredoka font-semibold text-foreground mb-2">Quiz Complete!</h1>
+        <p className="text-lg font-nunito text-muted-foreground">Here's how you did</p>
       </div>
 
       {/* Main Score Card */}
-      <Card className="p-8 bg-quiz-gradient text-white shadow-glow border-0 text-center">
+      <Card className="p-8 bg-mejakia-gradient text-white text-center">
         <div className="space-y-4">
           <div className="text-6xl">{performance.emoji}</div>
-          <h2 className="text-2xl font-bold">{performance.level}</h2>
-          <div className="text-5xl font-bold">{score}/{totalQuestions}</div>
-          <p className="text-xl opacity-90">{percentage}% Correct</p>
-          <Badge className="bg-quiz-yellow text-quiz-yellow-foreground text-lg px-4 py-2">
+          <h2 className="text-2xl font-fredoka font-semibold">{performance.level}</h2>
+          <div className="text-5xl font-nunito font-bold">{score}/{totalQuestions}</div>
+          <p className="text-xl font-nunito opacity-90">{percentage}% Correct</p>
+          <Badge className="bg-white text-mejakia-primary text-lg px-4 py-2 font-nunito font-bold">
             +{pointsEarned} Points
           </Badge>
         </div>
@@ -144,7 +144,7 @@ const QuizSummary = ({ score, totalQuestions, onPlayAgain, onBackToHome }: QuizS
       {/* Action Buttons */}
       <div className="space-y-3">
         <Button 
-          variant="quiz" 
+          variant="mejakia" 
           size="lg" 
           className="w-full"
           onClick={onPlayAgain}

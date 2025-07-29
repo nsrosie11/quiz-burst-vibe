@@ -5,22 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-bold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-bold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 font-nunito",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-quiz hover:shadow-glow hover:scale-105",
+        default: "bg-mejakia-gradient text-white rounded-xl shadow-mejakia hover:bg-mejakia-gradient-hover hover:shadow-mejakia-hover hover:translate-y-[1px] active:translate-y-[4px] active:shadow-none",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl",
         outline:
-          "border-2 border-primary bg-background text-primary hover:bg-primary hover:text-primary-foreground",
+          "border-2 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-quiz",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        quiz: "bg-quiz-gradient text-white font-bold shadow-quiz hover:shadow-glow hover:scale-105",
-        success: "bg-success text-success-foreground hover:bg-success/90 shadow-quiz",
-        warning: "bg-warning text-warning-foreground hover:bg-warning/90 shadow-quiz",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-xl border-2 border-border",
+        ghost: "hover:bg-accent hover:text-accent-foreground rounded-xl",
+        link: "text-primary underline-offset-4 hover:underline rounded-xl",
+        mejakia: "bg-mejakia-gradient text-white font-bold rounded-xl shadow-mejakia hover:bg-mejakia-gradient-hover hover:shadow-mejakia-hover hover:translate-y-[1px] active:translate-y-[4px] active:shadow-none",
+        success: "bg-success text-success-foreground hover:bg-success/90 rounded-xl border-2 border-border",
+        warning: "bg-warning text-warning-foreground hover:bg-warning/90 rounded-xl border-2 border-border",
       },
       size: {
         default: "h-12 px-6 py-3",
