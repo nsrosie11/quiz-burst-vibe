@@ -8,8 +8,12 @@ import QuizInterface from "@/components/QuizInterface";
 import LeaderboardPage from "@/components/LeaderboardPage";
 import QuizSummary from "@/components/QuizSummary";
 import CategoryLevelsPage from "@/components/CategoryLevelsPage";
+import ProfileDropdown from "@/components/ProfileDropdown";
+import ProfileEditForm from "@/components/ProfileEditForm";
+import PasswordChangeForm from "@/components/PasswordChangeForm";
+import DeviceListPage from "@/components/DeviceListPage";
 
-type AppState = "home" | "quiz" | "leaderboard" | "summary" | "categoryLevels";
+type AppState = "home" | "quiz" | "leaderboard" | "summary" | "categoryLevels" | "profileEdit" | "passwordChange" | "deviceList";
 
 const Index = () => {
   const { user, profile, loading, isAuthenticated } = useAuth();
@@ -86,6 +90,18 @@ const Index = () => {
     setCurrentScreen("leaderboard");
   };
 
+  const handleProfileEdit = () => {
+    setCurrentScreen("profileEdit");
+  };
+
+  const handlePasswordChange = () => {
+    setCurrentScreen("passwordChange");
+  };
+
+  const handleDeviceList = () => {
+    setCurrentScreen("deviceList");
+  };
+
   if (currentScreen === "quiz") {
     return (
       <QuizInterface 
@@ -123,8 +139,34 @@ const Index = () => {
     );
   }
 
+  if (currentScreen === "profileEdit") {
+    return <ProfileEditForm />;
+  }
+
+  if (currentScreen === "passwordChange") {
+    return <PasswordChangeForm />;
+  }
+
+  if (currentScreen === "deviceList") {
+    return <DeviceListPage />;
+  }
+
   return (
     <div className="relative">
+      {/* Header with Logo and Profile */}
+      <div className="flex justify-between items-center p-6 bg-background border-b border-stroke">
+        <img 
+          src="/lovable-uploads/0c79faf1-9632-4a1f-9cc8-4d93c7d5c0e4.png" 
+          alt="MejaKita" 
+          className="h-10"
+        />
+        <ProfileDropdown 
+          onProfileEdit={handleProfileEdit}
+          onPasswordChange={handlePasswordChange}
+          onDeviceList={handleDeviceList}
+        />
+      </div>
+
       <HomePage onStartQuiz={handleStartQuiz} userName={profile?.display_name || user?.email?.split('@')[0] || "Player"} />
       
       {/* Floating Leaderboard Button */}

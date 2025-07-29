@@ -30,7 +30,6 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       {/* Header */}
       <div className="flex items-center justify-between pt-8">
         <div className="flex items-center gap-3">
-          <img src="/lovable-uploads/0c79faf1-9632-4a1f-9cc8-4d93c7d5c0e4.png" alt="MejaKita Logo" className="w-10 h-10" />
           <img src={avatar1} alt="Avatar" className="w-12 h-12 rounded-xl border-2 border-border" />
           <div>
             <h1 className="text-xl font-fredoka font-semibold text-foreground">Hello, {userName}!</h1>
@@ -42,14 +41,6 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
             <Crown className="w-5 h-5 text-mejakia-primary" />
             <span className="text-lg font-nunito font-bold text-foreground">Gold</span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="w-10 h-10 rounded-xl hover:bg-accent"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 text-foreground" />
-          </Button>
         </div>
       </div>
 
@@ -86,7 +77,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
           <h2 className="text-2xl font-fredoka font-semibold text-foreground">Rekomendasi Hari Ini</h2>
         </div>
         
-        <Card className="p-6 bg-mejakia-gradient">
+        <Card className="p-6" style={{ backgroundColor: 'var(--recommendation-bg)' }}>
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
               <Calculator className="w-8 h-8 text-white" />
@@ -97,8 +88,12 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
                 <p className="text-white/80 font-nunito text-sm">Lagi banyak yang main kategori ini hari ini. Kesempatan bagus buat naik rank! 🚀</p>
               </div>
               <Button 
-                variant="default"
-                className="bg-white text-mejakia-primary hover:bg-white/90 font-bold shadow-none border-2 border-white"
+                style={{ 
+                  background: 'var(--recommendation-button)',
+                  boxShadow: 'var(--shadow-recommendation)',
+                  color: '#374151'
+                }}
+                className="hover:translate-y-[1px] active:translate-y-[5px] active:shadow-none transition-all duration-200 font-bold"
                 onClick={() => onStartQuiz('solo', 'math')}
               >
                 Mulai Sekarang

@@ -58,6 +58,24 @@ All colors MUST be HSL.
     /* Shadows */
     --shadow-mejakia: 0 4px 0 #A32C35;
     --shadow-mejakia-hover: 0 4px 0 #831C2C;
+    
+    /* Profile Gradient Colors */
+    --profile-gradient: linear-gradient(180deg, #1073B6 0%, #0B599C 100%);
+    --profile-gradient-hover: linear-gradient(180deg, #0B599C 0%, #084383 100%);
+    --shadow-profile: 0 4px 0 #084383;
+    --shadow-profile-hover: 0 4px 0 #063366;
+    
+    /* Recommendation Card Colors */
+    --recommendation-bg: #E36559;
+    --recommendation-button: linear-gradient(180deg, #FFFFFF 0%, #FDC4BF 100%);
+    --shadow-recommendation: 0 5px 0 #EA978F;
+    
+    /* Input Colors */
+    --input-border: linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%);
+    --input-border-focus: linear-gradient(180deg, #1073B6 0%, #0B599C 100%);
+    --input-shadow: 0 4px 0 #E5E7EB;
+    --input-shadow-focus: 0 4px 0 #23587F;
+    --input-text-focus: #317094;
 
     --radius: 1rem;
 

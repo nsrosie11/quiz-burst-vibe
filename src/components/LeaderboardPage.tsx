@@ -76,7 +76,7 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
             <img 
               src={leader.avatar} 
               alt={leader.name}
-              className="w-12 h-12 rounded-full border-2 border-white shadow-md"
+              className="w-12 h-12 rounded-xl border-2 border-white shadow-md"
             />
             
             <div className="flex-1">
@@ -109,12 +109,8 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
   return (
     <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pt-8">
-        <Button variant="ghost" onClick={onBack}>
-          ← Back
-        </Button>
-        <h1 className="text-2xl font-bold text-foreground">Leaderboard</h1>
-        <div></div>
+      <div className="pt-8">
+        <h1 className="text-3xl font-bold font-fredoka text-center">Leaderboard</h1>
       </div>
 
       {/* Top 3 Podium */}

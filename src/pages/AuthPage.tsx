@@ -146,7 +146,7 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
                 placeholder="Masukkan nama Anda"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="h-12"
+                className="mejakia-input"
               />
             </div>
           )}
@@ -160,7 +160,7 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-12"
+              className="mejakia-input"
             />
           </div>
 
@@ -174,7 +174,7 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 pr-12"
+                className="mejakia-input pr-12"
                 minLength={6}
               />
               <Button

@@ -277,11 +277,9 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pt-8">
-        <Button variant="ghost" onClick={onBack}>
-          ← Back
-        </Button>
-        <div className="flex items-center gap-2 text-foreground">
+      <div className="text-center pt-8">
+        <h1 className="text-2xl font-bold text-foreground font-fredoka">Kategori {category}</h1>
+        <div className="flex justify-center items-center gap-2 text-foreground mt-2">
           <Clock className="w-5 h-5" />
           <span className="text-lg font-nunito font-bold">{timeLeft}s</span>
         </div>

@@ -79,11 +79,19 @@ export default {
 			},
 			backgroundImage: {
 				'mejakia-gradient': 'var(--mejakia-gradient)',
-				'mejakia-gradient-hover': 'var(--mejakia-gradient-hover)'
+				'mejakia-gradient-hover': 'var(--mejakia-gradient-hover)',
+				'profile-gradient': 'var(--profile-gradient)',
+				'profile-gradient-hover': 'var(--profile-gradient-hover)',
+				'recommendation-button': 'var(--recommendation-button)'
 			},
 			boxShadow: {
 				'mejakia': 'var(--shadow-mejakia)',
-				'mejakia-hover': 'var(--shadow-mejakia-hover)'
+				'mejakia-hover': 'var(--shadow-mejakia-hover)',
+				'profile': 'var(--shadow-profile)',
+				'profile-hover': 'var(--shadow-profile-hover)',
+				'recommendation': 'var(--shadow-recommendation)',
+				'input': 'var(--input-shadow)',
+				'input-focus': 'var(--input-shadow-focus)'
 			},
 			fontFamily: {
 				'fredoka': ['Fredoka', 'cursive'],
