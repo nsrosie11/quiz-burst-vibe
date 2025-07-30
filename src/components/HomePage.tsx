@@ -36,12 +36,6 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
             <p className="text-sm text-muted-foreground font-nunito">Ready for a quiz?</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Crown className="w-5 h-5 text-mejakia-primary" />
-            <span className="text-lg font-nunito font-bold text-foreground">Gold</span>
-          </div>
-        </div>
       </div>
 
       {/* Stats Cards */}
@@ -80,7 +74,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
         <Card className="p-6" style={{ backgroundColor: 'var(--recommendation-bg)' }}>
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Calculator className="w-8 h-8 text-white" />
+              <img src="/lovable-uploads/6262b546-75ae-400c-8ed4-9dfebd5d8ff5.png" alt="Cat" className="w-10 h-10 rounded-lg" />
             </div>
             <div className="flex-1 space-y-3">
               <div>

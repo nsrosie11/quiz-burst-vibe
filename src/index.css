@@ -59,6 +59,9 @@ All colors MUST be HSL.
     --shadow-mejakia: 0 4px 0 #A32C35;
     --shadow-mejakia-hover: 0 4px 0 #831C2C;
     
+    /* Gray gradient for leaderboard buttons */
+    --gray-gradient: linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%);
+    
     /* Profile Gradient Colors */
     --profile-gradient: linear-gradient(180deg, #1073B6 0%, #0B599C 100%);
     --profile-gradient-hover: linear-gradient(180deg, #0B599C 0%, #084383 100%);

@@ -65,13 +65,17 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
           }`}
         >
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getRankBadge(leader.rank)}`}>
+            <button className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white shadow-[0_4px_0] ${
+              leader.rank <= 3 
+                ? "bg-profile-gradient shadow-[0_4px_0_#084383]" 
+                : "bg-gray-gradient shadow-[0_4px_0_rgba(209,213,221,0.73)]"
+            }`}>
               {leader.rank <= 3 ? (
                 getRankIcon(leader.rank)
               ) : (
-                <span className="text-white font-bold">#{leader.rank}</span>
+                <span>#{leader.rank}</span>
               )}
-            </div>
+            </button>
             
             <img 
               src={leader.avatar} 
@@ -160,7 +164,7 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
 
       {/* Leaderboard Tabs */}
       <Tabs defaultValue="weekly" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 bg-card shadow-quiz">
+        <TabsList className="grid w-full grid-cols-2 bg-card border-2 border-stroke rounded-xl">
           <TabsTrigger value="weekly" className="font-bold">Weekly</TabsTrigger>
           <TabsTrigger value="monthly" className="font-bold">Monthly</TabsTrigger>
         </TabsList>

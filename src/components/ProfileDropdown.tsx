@@ -26,8 +26,8 @@ const ProfileDropdown = ({ onProfileEdit, onPasswordChange, onDeviceList }: Prof
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none">
-          <Avatar className="w-10 h-10 border-2 border-stroke hover:border-primary transition-colors">
-            <AvatarImage src="/lovable-uploads/32babd27-9246-43b1-8e03-8668c61a1739.png" alt="Profile" />
+          <Avatar className="w-10 h-10 border-2 border-stroke hover:border-primary transition-colors rounded-xl">
+            <AvatarImage src="/lovable-uploads/6262b546-75ae-400c-8ed4-9dfebd5d8ff5.png" alt="Profile" className="rounded-xl" />
             <AvatarFallback className="bg-primary/10 text-primary font-semibold">
               {profile?.display_name?.[0] || user?.email?.[0] || "?"}
             </AvatarFallback>

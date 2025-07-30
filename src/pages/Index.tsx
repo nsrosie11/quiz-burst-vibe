@@ -177,7 +177,7 @@ const Index = () => {
           className="w-16 h-16 rounded-xl"
           onClick={handleShowLeaderboard}
         >
-          <Trophy className="w-8 h-8" />
+          <img src="/lovable-uploads/a1515326-a2f5-41ef-9358-eedee1e91640.png" alt="Trophy" className="w-10 h-10" />
         </Button>
       </div>
     </div>

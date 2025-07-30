@@ -72,7 +72,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
 
       {/* Stats Section */}
       <div className="space-y-4">
-        <Card className="p-6 bg-card shadow-quiz border-0">
+        <Card className="p-6 bg-card border-2 border-stroke">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Score</p>
@@ -88,7 +88,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
           </div>
           
           {/* Progress Bar */}
-          <div className="space-y-2">
+          <div className="space-y-2 border-2 border-stroke rounded-xl p-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Progress</p>
               <p className="text-sm text-muted-foreground">{Math.round(progressPercentage)}%</p>
@@ -134,7 +134,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       </div>
 
       {/* Achievement Section */}
-      <Card className="p-6 bg-card shadow-quiz border-0">
+      <Card className="p-6 bg-card border-2 border-stroke">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-quiz-purple rounded-full flex items-center justify-center">
             <Trophy className="w-8 h-8 text-white" />

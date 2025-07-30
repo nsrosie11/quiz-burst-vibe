@@ -82,7 +82,8 @@ export default {
 				'mejakia-gradient-hover': 'var(--mejakia-gradient-hover)',
 				'profile-gradient': 'var(--profile-gradient)',
 				'profile-gradient-hover': 'var(--profile-gradient-hover)',
-				'recommendation-button': 'var(--recommendation-button)'
+				'recommendation-button': 'var(--recommendation-button)',
+				'gray-gradient': 'var(--gray-gradient)'
 			},
 			boxShadow: {
 				'mejakia': 'var(--shadow-mejakia)',
