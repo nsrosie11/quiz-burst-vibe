@@ -30,9 +30,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       {/* Header */}
       <div className="flex items-center justify-between pt-8">
         <div className="flex items-center gap-3">
-          <img src={avatar1} alt="Avatar" className="w-12 h-12 rounded-xl border-2 border-border" />
           <div>
-            <h1 className="text-xl font-fredoka font-semibold text-foreground">Hello, {userName}!</h1>
             <p className="text-sm text-muted-foreground font-nunito">Ready for a quiz?</p>
           </div>
         </div>
@@ -67,14 +65,14 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       {/* Daily Recommendation */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Star className="w-6 h-6 text-mejakia-primary" />
+          <img src="/lovable-uploads/18727576-6c4a-4bae-985e-422298593a2f.png" alt="Cat" className="w-6 h-6" />
           <h2 className="text-2xl font-fredoka font-semibold text-foreground">Rekomendasi Hari Ini</h2>
         </div>
         
         <Card className="p-6" style={{ backgroundColor: 'var(--recommendation-bg)' }}>
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <img src="/lovable-uploads/6262b546-75ae-400c-8ed4-9dfebd5d8ff5.png" alt="Cat" className="w-10 h-10 rounded-lg" />
+              <Calculator className="w-10 h-10 text-white" />
             </div>
             <div className="flex-1 space-y-3">
               <div>
