@@ -2,11 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const PasswordChangeForm = () => {
+interface PasswordChangeFormProps {
+  onBack: () => void;
+}
+
+const PasswordChangeForm = ({ onBack }: PasswordChangeFormProps) => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -76,9 +80,19 @@ const PasswordChangeForm = () => {
 
         {/* Main Content */}
         <div className="flex-1">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-center font-fredoka">Ubah Password</h1>
-            <p className="text-muted-foreground text-center mt-2">Ubah password kamu untuk keamanan akun</p>
+          <div className="mb-8 relative">
+            <Button 
+              variant="back" 
+              size="icon" 
+              onClick={onBack}
+              className="absolute left-0 top-0 w-10 h-10"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold font-fredoka">Ubah Password</h1>
+              <p className="text-muted-foreground mt-2">Ubah password kamu untuk keamanan akun</p>
+            </div>
           </div>
 
           <div className="max-w-lg space-y-6">

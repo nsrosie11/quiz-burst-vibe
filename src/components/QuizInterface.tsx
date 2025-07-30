@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, X, Clock, ArrowRight } from "lucide-react";
+import { Check, X, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface Question {
   id: number;
@@ -277,11 +277,21 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
-      <div className="text-center pt-8">
-        <h1 className="text-2xl font-bold text-foreground font-fredoka">Kategori {category}</h1>
-        <div className="flex justify-center items-center gap-2 text-foreground mt-2">
-          <Clock className="w-5 h-5" />
-          <span className="text-lg font-nunito font-bold">{timeLeft}s</span>
+      <div className="pt-8 relative">
+        <Button 
+          variant="back" 
+          size="icon" 
+          onClick={onBack}
+          className="absolute left-0 top-8 w-10 h-10"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground font-fredoka">Kategori {category}</h1>
+          <div className="flex justify-center items-center gap-2 text-foreground mt-2">
+            <Clock className="w-5 h-5" />
+            <span className="text-lg font-nunito font-bold">{timeLeft}s</span>
+          </div>
         </div>
       </div>
 

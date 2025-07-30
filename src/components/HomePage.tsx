@@ -31,7 +31,6 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       <div className="flex items-center justify-between pt-8">
         <div className="flex items-center gap-3">
           <div>
-            <p className="text-sm text-muted-foreground font-nunito">Ready for a quiz?</p>
           </div>
         </div>
       </div>

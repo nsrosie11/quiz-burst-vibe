@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Medal, Trophy, Star } from "lucide-react";
+import { Crown, Medal, Trophy, Star, ArrowLeft } from "lucide-react";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 
@@ -113,7 +113,15 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
   return (
     <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
       {/* Header */}
-      <div className="pt-8">
+      <div className="pt-8 relative">
+        <Button 
+          variant="back" 
+          size="icon" 
+          onClick={onBack}
+          className="absolute left-0 top-8 w-10 h-10"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
         <h1 className="text-3xl font-bold font-fredoka text-center">Leaderboard</h1>
       </div>
 

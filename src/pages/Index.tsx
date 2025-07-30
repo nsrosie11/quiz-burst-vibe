@@ -140,15 +140,15 @@ const Index = () => {
   }
 
   if (currentScreen === "profileEdit") {
-    return <ProfileEditForm />;
+    return <ProfileEditForm onBack={handleBackToHome} />;
   }
 
   if (currentScreen === "passwordChange") {
-    return <PasswordChangeForm />;
+    return <PasswordChangeForm onBack={handleBackToHome} />;
   }
 
   if (currentScreen === "deviceList") {
-    return <DeviceListPage />;
+    return <DeviceListPage onBack={handleBackToHome} />;
   }
 
   return (
@@ -158,7 +158,7 @@ const Index = () => {
         <img 
           src="/lovable-uploads/0c79faf1-9632-4a1f-9cc8-4d93c7d5c0e4.png" 
           alt="MejaKita" 
-          className="h-10"
+          className="h-8"
         />
         <ProfileDropdown 
           onProfileEdit={handleProfileEdit}
@@ -169,17 +169,13 @@ const Index = () => {
 
       <HomePage onStartQuiz={handleStartQuiz} userName={profile?.display_name || user?.email?.split('@')[0] || "Player"} />
       
-      {/* Floating Leaderboard Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button 
-          variant="mejakia" 
-          size="icon"
-          className="w-16 h-16 rounded-xl"
-          onClick={handleShowLeaderboard}
-        >
-          <img src="/lovable-uploads/a1515326-a2f5-41ef-9358-eedee1e91640.png" alt="Trophy" className="w-10 h-10" />
-        </Button>
-      </div>
+      {/* Floating Leaderboard Image */}
+      <button
+        onClick={handleShowLeaderboard}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none z-50"
+      >
+        <img src="/lovable-uploads/a1515326-a2f5-41ef-9358-eedee1e91640.png" alt="Trophy" className="w-14 h-14" />
+      </button>
     </div>
   );
 };

@@ -83,7 +83,8 @@ export default {
 				'profile-gradient': 'var(--profile-gradient)',
 				'profile-gradient-hover': 'var(--profile-gradient-hover)',
 				'recommendation-button': 'var(--recommendation-button)',
-				'gray-gradient': 'var(--gray-gradient)'
+				'gray-gradient': 'var(--gray-gradient)',
+				'back-button': 'linear-gradient(#1073B6, #0B599C)'
 			},
 			boxShadow: {
 				'mejakia': 'var(--shadow-mejakia)',
@@ -92,7 +93,8 @@ export default {
 				'profile-hover': 'var(--shadow-profile-hover)',
 				'recommendation': 'var(--shadow-recommendation)',
 				'input': 'var(--input-shadow)',
-				'input-focus': 'var(--input-shadow-focus)'
+				'input-focus': 'var(--input-shadow-focus)',
+				'back-button': '0 4px 0 #084383'
 			},
 			fontFamily: {
 				'fredoka': ['Fredoka', 'cursive'],

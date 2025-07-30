@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowLeft } from "lucide-react";
 
-const DeviceListPage = () => {
+interface DeviceListPageProps {
+  onBack: () => void;
+}
+
+const DeviceListPage = ({ onBack }: DeviceListPageProps) => {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex">
@@ -33,9 +37,19 @@ const DeviceListPage = () => {
 
         {/* Main Content */}
         <div className="flex-1">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-center font-fredoka">Daftar Perangkat</h1>
-            <p className="text-muted-foreground text-center mt-2">Lihat daftar perangkat kamu yang terhubung ke akun Mejakita</p>
+          <div className="mb-8 relative">
+            <Button 
+              variant="back" 
+              size="icon" 
+              onClick={onBack}
+              className="absolute left-0 top-0 w-10 h-10"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold font-fredoka">Daftar Perangkat</h1>
+              <p className="text-muted-foreground mt-2">Lihat daftar perangkat kamu yang terhubung ke akun Mejakita</p>
+            </div>
           </div>
 
           <Card className="bg-card">

@@ -6,8 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
-const ProfileEditForm = () => {
+interface ProfileEditFormProps {
+  onBack: () => void;
+}
+
+const ProfileEditForm = ({ onBack }: ProfileEditFormProps) => {
   const { user, profile } = useAuth();
   const [name, setName] = useState(profile?.display_name || "");
   const [email] = useState(user?.email || "");
@@ -66,9 +71,19 @@ const ProfileEditForm = () => {
 
         {/* Main Content */}
         <div className="flex-1">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-center font-fredoka">Profile Kamu</h1>
-            <p className="text-muted-foreground text-center mt-2">Yuk, Tunjukin Siapa Kamu</p>
+          <div className="mb-8 relative">
+            <Button 
+              variant="back" 
+              size="icon" 
+              onClick={onBack}
+              className="absolute left-0 top-0 w-10 h-10"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold font-fredoka">Profile Kamu</h1>
+              <p className="text-muted-foreground mt-2">Yuk, Tunjukin Siapa Kamu</p>
+            </div>
           </div>
 
           <div className="flex gap-8">

@@ -63,11 +63,21 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
   return (
     <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
       {/* Header */}
-      <div className="pt-8">
-        <h1 className="text-3xl font-bold text-foreground text-center flex items-center justify-center gap-2 font-fredoka">
-          {category.icon} Kategori {category.name}
-        </h1>
-        <p className="text-muted-foreground text-center mt-2">Complete levels to earn points!</p>
+      <div className="pt-8 relative">
+        <Button 
+          variant="back" 
+          size="icon" 
+          onClick={onBack}
+          className="absolute left-0 top-8 w-10 h-10"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2 font-fredoka">
+            {category.icon} Kategori {category.name}
+          </h1>
+          <p className="text-muted-foreground mt-2">Complete levels to earn points!</p>
+        </div>
       </div>
 
       {/* Stats Section */}

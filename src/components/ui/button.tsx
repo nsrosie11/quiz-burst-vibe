@@ -21,6 +21,7 @@ const buttonVariants = cva(
         mejakia: "bg-mejakia-gradient text-white font-bold rounded-xl shadow-mejakia hover:bg-mejakia-gradient-hover hover:shadow-mejakia-hover hover:translate-y-[1px] active:translate-y-[4px] active:shadow-none",
         success: "bg-success text-success-foreground hover:bg-success/90 rounded-xl border-2 border-border",
         warning: "bg-warning text-warning-foreground hover:bg-warning/90 rounded-xl border-2 border-border",
+        back: "bg-back-button text-white shadow-back-button hover:translate-y-[1px] active:translate-y-[4px] active:shadow-none transition-all duration-200 rounded-xl",
       },
       size: {
         default: "h-12 px-6 py-3",
