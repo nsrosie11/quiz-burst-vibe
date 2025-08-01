@@ -85,7 +85,8 @@ export default {
 				'recommendation-button': 'var(--recommendation-button)',
 				'gray-gradient': 'var(--gray-gradient)',
 				'back-button': 'linear-gradient(#1073B6, #0B599C)',
-				'input-focus': 'linear-gradient(135deg, #1073B6, #0B599C)'
+				'input-focus': 'linear-gradient(135deg, #1073B6, #0B599C)',
+				'input-gradient': 'linear-gradient(135deg, #1073B6, #0B599C)'
 			},
 			boxShadow: {
 				'mejakia': 'var(--shadow-mejakia)',
