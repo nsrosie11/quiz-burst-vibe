@@ -87,7 +87,7 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
               <h3 className={`font-bold text-lg ${leader.isCurrentUser ? "text-white" : "text-foreground"}`}>
                 {leader.name}
                 {leader.isCurrentUser && (
-                  <Badge className="ml-2 bg-quiz-yellow text-quiz-yellow-foreground">You</Badge>
+                  <Badge className="ml-2 bg-yellow-500 text-black">You</Badge>
                 )}
               </h3>
               <div className="flex items-center gap-2">
@@ -172,9 +172,9 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
 
       {/* Leaderboard Tabs */}
       <Tabs defaultValue="weekly" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 bg-card border-2 border-stroke rounded-xl">
-          <TabsTrigger value="weekly" className="font-bold">Weekly</TabsTrigger>
-          <TabsTrigger value="monthly" className="font-bold">Monthly</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-white border-2 border-stroke rounded-xl p-1">
+          <TabsTrigger value="weekly" className="font-bold data-[state=active]:bg-mejakia-gradient data-[state=active]:text-white data-[state=active]:shadow-none rounded-lg">Weekly</TabsTrigger>
+          <TabsTrigger value="monthly" className="font-bold data-[state=active]:bg-mejakia-gradient data-[state=active]:text-white data-[state=active]:shadow-none rounded-lg">Monthly</TabsTrigger>
         </TabsList>
         
         <TabsContent value="weekly" className="space-y-4">
