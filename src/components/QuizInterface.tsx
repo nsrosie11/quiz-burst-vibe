@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, X, Clock, ArrowRight, ArrowLeft } from "lucide-react";
+import { Check, X, Clock, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
 
 interface Question {
   id: number;
@@ -364,6 +364,19 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
           <div className="text-center">
             <p className="text-sm font-nunito text-muted-foreground">Score</p>
             <p className="text-2xl font-nunito font-bold text-foreground">{score}</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Next Award Display */}
+      <div className="fixed bottom-4 right-4">
+        <Card className="p-3 bg-card">
+          <div className="text-center flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-warning" />
+            <div>
+              <p className="text-xs font-nunito text-muted-foreground">Next Award</p>
+              <p className="text-sm font-nunito font-bold text-foreground">+50 pts</p>
+            </div>
           </div>
         </Card>
       </div>

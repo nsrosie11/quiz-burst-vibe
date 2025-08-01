@@ -54,7 +54,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       case 'done':
         return "bg-green-500 hover:bg-green-600 text-white shadow-quiz";
       case 'current':
-        return "bg-quiz-yellow hover:bg-quiz-yellow/90 text-quiz-yellow-foreground shadow-glow";
+        return "bg-red-500 hover:bg-red-600 text-white shadow-glow";
       case 'locked':
         return "bg-gray-200 text-gray-400 cursor-not-allowed";
     }

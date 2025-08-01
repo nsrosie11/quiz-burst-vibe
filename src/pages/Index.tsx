@@ -158,7 +158,7 @@ const Index = () => {
         <img 
           src="/lovable-uploads/0c79faf1-9632-4a1f-9cc8-4d93c7d5c0e4.png" 
           alt="MejaKita" 
-          className="h-8"
+          className="h-6"
         />
         <ProfileDropdown 
           onProfileEdit={handleProfileEdit}

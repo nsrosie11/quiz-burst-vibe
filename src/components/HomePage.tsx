@@ -36,7 +36,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mt-8">
         <Card className="p-4 bg-card">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-mejakia-gradient rounded-xl flex items-center justify-center">
@@ -64,7 +64,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
       {/* Daily Recommendation */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <img src="/lovable-uploads/18727576-6c4a-4bae-985e-422298593a2f.png" alt="Cat" className="w-6 h-6" />
+          <img src="/lovable-uploads/18727576-6c4a-4bae-985e-422298593a2f.png" alt="Cat" className="w-6 h-6 object-contain aspect-square" />
           <h2 className="text-2xl font-fredoka font-semibold text-foreground">Rekomendasi Hari Ini</h2>
         </div>
         
