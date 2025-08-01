@@ -371,11 +371,11 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
       {/* Next Award Display */}
       <div className="fixed bottom-4 right-4">
         <Card className="p-3 bg-card">
-          <div className="text-center flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-warning" />
             <div>
               <p className="text-xs font-nunito text-muted-foreground">Next Award</p>
-              <p className="text-sm font-nunito font-bold text-foreground">+50 pts</p>
+              <p className="text-sm font-nunito font-bold text-foreground">Complete 2 more levels to unlock Math Champion badge!</p>
             </div>
           </div>
         </Card>
