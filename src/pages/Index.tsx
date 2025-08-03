@@ -22,6 +22,7 @@ const Index = () => {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState<{id: string, name: string, icon: string} | null>(null);
   const [currentCategory, setCurrentCategory] = useState<string>("random");
+  const [selectedLevelId, setSelectedLevelId] = useState<string>("");
 
   if (loading) {
     return (
@@ -66,9 +67,10 @@ const Index = () => {
     return categories[categoryId as keyof typeof categories] || categories.random;
   };
 
-  const handleStartLevel = (categoryId: string, levelId: number) => {
+  const handleStartLevel = (categoryId: string, levelId: string) => {
     console.log(`Starting level ${levelId} in ${categoryId} category`);
     setCurrentCategory(categoryId);
+    setSelectedLevelId(levelId);
     setCurrentScreen("quiz");
   };
 

@@ -1,14 +1,17 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Star, Trophy, Lock, Play, CheckCircle } from "lucide-react";
+import { useQuizData, QuizLevel, UserLevelProgress } from "@/hooks/useQuizData";
 
 interface Level {
-  id: number;
+  id: string;
   name: string;
-  status: 'done' | 'current' | 'locked';
+  status: 'locked' | 'current' | 'completed';
   points: number;
   maxPoints: number;
+  level_number: number;
 }
 
 interface CategoryLevelsPageProps {
@@ -18,29 +21,48 @@ interface CategoryLevelsPageProps {
     icon: string;
   };
   onBack: () => void;
-  onStartLevel: (categoryId: string, levelId: number) => void;
+  onStartLevel: (categoryId: string, levelId: string) => void;
 }
 
 const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPageProps) => {
-  // Mock data for levels
-  const levels: Level[] = [
-    { id: 1, name: "Level 1", status: 'done', points: 100, maxPoints: 100 },
-    { id: 2, name: "Level 2", status: 'done', points: 85, maxPoints: 100 },
-    { id: 3, name: "Level 3", status: 'done', points: 95, maxPoints: 100 },
-    { id: 4, name: "Level 4", status: 'current', points: 0, maxPoints: 100 },
-    { id: 5, name: "Level 5", status: 'locked', points: 0, maxPoints: 100 },
-    { id: 6, name: "Level 6", status: 'locked', points: 0, maxPoints: 100 },
-    { id: 7, name: "Level 7", status: 'locked', points: 0, maxPoints: 100 },
-    { id: 8, name: "Level 8", status: 'locked', points: 0, maxPoints: 100 },
-  ];
+  const { getLevelsForCategory, getUserLevelProgress } = useQuizData();
+  const [levels, setLevels] = useState<Level[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadLevels = async () => {
+      setLoading(true);
+      const [quizLevels, userProgress] = await Promise.all([
+        getLevelsForCategory(category.id),
+        getUserLevelProgress(category.id)
+      ]);
+
+      const levelsWithProgress = quizLevels.map(level => {
+        const progress = userProgress.find(p => p.level_id === level.id);
+        return {
+          id: level.id,
+          name: level.name,
+          status: progress?.status || 'locked',
+          points: progress?.score || 0,
+          maxPoints: level.max_points,
+          level_number: level.level_number
+        };
+      });
+
+      setLevels(levelsWithProgress);
+      setLoading(false);
+    };
+
+    loadLevels();
+  }, [category.id, getLevelsForCategory, getUserLevelProgress]);
 
   const totalScore = levels.reduce((sum, level) => sum + level.points, 0);
-  const completedLevels = levels.filter(level => level.status === 'done').length;
+  const completedLevels = levels.filter(level => level.status === 'completed').length;
   const progressPercentage = (completedLevels / levels.length) * 100;
 
   const getStatusIcon = (status: Level['status']) => {
     switch (status) {
-      case 'done':
+      case 'completed':
         return <CheckCircle className="w-6 h-6 text-green-500" />;
       case 'current':
         return <Play className="w-6 h-6 text-white" />;
@@ -51,7 +73,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
 
   const getLevelCardClass = (status: Level['status']) => {
     switch (status) {
-      case 'done':
+      case 'completed':
         return "bg-green-500 hover:bg-green-600 text-white shadow-quiz";
       case 'current':
         return "bg-red-500 hover:bg-red-600 text-white shadow-glow";
@@ -124,7 +146,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
                 </div>
                 <div className="text-center">
                   <h3 className="font-bold text-lg">{level.name}</h3>
-                  {level.status === 'done' && (
+                  {level.status === 'completed' && (
                     <div className="flex items-center justify-center gap-1 mt-1">
                       <Star className="w-4 h-4 text-yellow-300 fill-current" />
                       <p className="text-sm">+{level.points} pts</p>

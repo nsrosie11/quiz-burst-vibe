@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Crown, Medal, Trophy, Star, ArrowLeft } from "lucide-react";
+import { useQuizData, LeaderboardEntry } from "@/hooks/useQuizData";
+import { useAuth } from "@/hooks/useAuth";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 
@@ -11,27 +14,45 @@ interface LeaderboardPageProps {
 }
 
 const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
-  const weeklyLeaders = [
-    { rank: 1, name: "Alex Champion", score: 2847, avatar: avatar1, isCurrentUser: false },
-    { rank: 2, name: "Sarah Quiz", score: 2654, avatar: avatar2, isCurrentUser: false },
-    { rank: 3, name: "Mike Brain", score: 2341, avatar: avatar1, isCurrentUser: false },
-    { rank: 4, name: "Emma Smart", score: 2156, avatar: avatar2, isCurrentUser: false },
-    { rank: 5, name: "You", score: 1847, avatar: avatar1, isCurrentUser: true },
-    { rank: 6, name: "John Quick", score: 1723, avatar: avatar2, isCurrentUser: false },
-    { rank: 7, name: "Lisa Bright", score: 1654, avatar: avatar1, isCurrentUser: false },
-    { rank: 8, name: "Tom Fast", score: 1587, avatar: avatar2, isCurrentUser: false },
-  ];
+  const { getLeaderboard } = useQuizData();
+  const { user } = useAuth();
+  const [weeklyLeaders, setWeeklyLeaders] = useState<LeaderboardEntry[]>([]);
+  const [monthlyLeaders, setMonthlyLeaders] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const monthlyLeaders = [
-    { rank: 1, name: "Sarah Quiz", score: 8947, avatar: avatar2, isCurrentUser: false },
-    { rank: 2, name: "Alex Champion", score: 8654, avatar: avatar1, isCurrentUser: false },
-    { rank: 3, name: "Mike Brain", score: 7841, avatar: avatar1, isCurrentUser: false },
-    { rank: 4, name: "Emma Smart", score: 7456, avatar: avatar2, isCurrentUser: false },
-    { rank: 5, name: "Lisa Bright", score: 6954, avatar: avatar1, isCurrentUser: false },
-    { rank: 6, name: "John Quick", score: 6723, avatar: avatar2, isCurrentUser: false },
-    { rank: 7, name: "You", score: 6247, avatar: avatar1, isCurrentUser: true },
-    { rank: 8, name: "Tom Fast", score: 5987, avatar: avatar2, isCurrentUser: false },
-  ];
+  useEffect(() => {
+    const loadLeaderboards = async () => {
+      setLoading(true);
+      const [weekly, monthly] = await Promise.all([
+        getLeaderboard('weekly'),
+        getLeaderboard('monthly')
+      ]);
+      
+      // Add current user if not in top rankings
+      const ensureCurrentUser = (leaders: LeaderboardEntry[]) => {
+        const currentUser = leaders.find(l => l.user_id === user?.id);
+        if (!currentUser && user?.id) {
+          // Add current user at the end with their actual stats or placeholder
+          return [...leaders, {
+            user_id: user.id,
+            total_score: 0,
+            global_rank: leaders.length + 1,
+            display_name: 'You'
+          }];
+        }
+        return leaders.map(l => ({
+          ...l,
+          display_name: l.user_id === user?.id ? 'You' : l.display_name
+        }));
+      };
+
+      setWeeklyLeaders(ensureCurrentUser(weekly));
+      setMonthlyLeaders(ensureCurrentUser(monthly));
+      setLoading(false);
+    };
+
+    loadLeaderboards();
+  }, [getLeaderboard, user?.id]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -53,60 +74,64 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
     return "bg-muted";
   };
 
-  const LeaderboardList = ({ leaders }: { leaders: typeof weeklyLeaders }) => (
+  const LeaderboardList = ({ leaders }: { leaders: LeaderboardEntry[] }) => (
     <div className="space-y-3">
-      {leaders.map((leader, index) => (
-        <Card 
-          key={leader.rank}
-          className={`p-4 border-0 shadow-quiz ${
-            leader.isCurrentUser 
-              ? "bg-quiz-gradient text-white shadow-glow" 
-              : "bg-card"
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <button className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white shadow-[0_4px_0] ${
-              leader.rank <= 3 
-                ? "bg-profile-gradient shadow-[0_4px_0_#084383]" 
-                : "bg-gray-gradient shadow-[0_4px_0_rgba(209,213,221,0.73)]"
-            }`}>
-              {leader.rank <= 3 ? (
-                getRankIcon(leader.rank)
-              ) : (
-                <span>#{leader.rank}</span>
-              )}
-            </button>
-            
-            <img 
-              src={leader.avatar} 
-              alt={leader.name}
-              className="w-12 h-12 rounded-xl border-2 border-white shadow-md"
-            />
-            
-            <div className="flex-1">
-              <h3 className={`font-bold text-lg ${leader.isCurrentUser ? "text-white" : "text-foreground"}`}>
-                {leader.name}
-                {leader.isCurrentUser && (
-                  <Badge className="ml-2 bg-yellow-500 text-black">You</Badge>
+      {leaders.map((leader, index) => {
+        const isCurrentUser = leader.display_name === 'You';
+        const rank = leader.global_rank;
+        return (
+          <Card 
+            key={leader.user_id}
+            className={`p-4 border-0 shadow-quiz ${
+              isCurrentUser 
+                ? "bg-quiz-gradient text-white shadow-glow" 
+                : "bg-card"
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <button className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white shadow-[0_4px_0] ${
+                rank <= 3 
+                  ? "bg-profile-gradient shadow-[0_4px_0_#084383]" 
+                  : "bg-gray-gradient shadow-[0_4px_0_rgba(209,213,221,0.73)]"
+              }`}>
+                {rank <= 3 ? (
+                  getRankIcon(rank)
+                ) : (
+                  <span>#{rank}</span>
                 )}
-              </h3>
-              <div className="flex items-center gap-2">
-                <Star className={`w-4 h-4 ${leader.isCurrentUser ? "text-yellow-300" : "text-quiz-yellow"}`} />
-                <span className={`text-sm ${leader.isCurrentUser ? "text-white/80" : "text-muted-foreground"}`}>
-                  {leader.score.toLocaleString()} points
-                </span>
+              </button>
+              
+              <img 
+                src={index % 2 === 0 ? avatar1 : avatar2} 
+                alt={leader.display_name || 'User'}
+                className="w-12 h-12 rounded-xl border-2 border-white shadow-md"
+              />
+              
+              <div className="flex-1">
+                <h3 className={`font-bold text-lg ${isCurrentUser ? "text-white" : "text-foreground"}`}>
+                  {leader.display_name}
+                  {isCurrentUser && (
+                    <Badge className="ml-2 bg-yellow-500 text-black">You</Badge>
+                  )}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Star className={`w-4 h-4 ${isCurrentUser ? "text-yellow-300" : "text-quiz-yellow"}`} />
+                  <span className={`text-sm ${isCurrentUser ? "text-white/80" : "text-muted-foreground"}`}>
+                    {leader.total_score.toLocaleString()} points
+                  </span>
+                </div>
               </div>
+              
+              {rank <= 3 && (
+                <Trophy className={`w-6 h-6 ${
+                  rank === 1 ? "text-yellow-500" : 
+                  rank === 2 ? "text-gray-400" : "text-amber-600"
+                }`} />
+              )}
             </div>
-            
-            {leader.rank <= 3 && (
-              <Trophy className={`w-6 h-6 ${
-                leader.rank === 1 ? "text-yellow-500" : 
-                leader.rank === 2 ? "text-gray-400" : "text-amber-600"
-              }`} />
-            )}
-          </div>
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </div>
   );
 
