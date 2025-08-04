@@ -44,27 +44,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   const currentQ = questions[currentQuestion];
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-fredoka text-foreground">Loading questions...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-fredoka text-foreground">No questions available</h2>
-          <Button onClick={onBack}>Go Back</Button>
-        </div>
-      </div>
-    );
-  }
-
+  // Timer effect - must be declared before any early returns
   useEffect(() => {
     if (timeLeft > 0 && !showFeedback) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -103,13 +83,48 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
         : "bg-card hover:bg-muted";
     }
     
-    if (index === currentQ.correctAnswer) {
+    if (currentQ && index === currentQ.correctAnswer) {
       return "bg-success text-success-foreground";
-    } else if (index === selectedAnswer && selectedAnswer !== currentQ.correctAnswer) {
+    } else if (index === selectedAnswer && currentQ && selectedAnswer !== currentQ.correctAnswer) {
       return "bg-destructive text-destructive-foreground";
     }
     return "bg-muted";
   };
+
+  // Handle loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-fredoka text-foreground">Loading questions...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle no questions state
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-fredoka text-foreground">No questions available</h2>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle invalid current question
+  if (!currentQ) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-fredoka text-foreground">Error loading question</h2>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
