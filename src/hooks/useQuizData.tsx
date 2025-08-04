@@ -220,6 +220,30 @@ export const useQuizData = () => {
     return (data || []) as UserLevelProgress[];
   };
 
+  // Get quiz questions for category
+  const getQuizQuestions = async (categoryId: string, levelId?: string): Promise<any[]> => {
+    let query = supabase
+      .from('quiz_questions')
+      .select('*')
+      .eq('category_id', categoryId);
+    
+    if (levelId) {
+      query = query.eq('level_id', levelId);
+    }
+    
+    const { data, error } = await query.limit(5);
+    
+    if (error || !data) return [];
+    
+    // Transform to match QuizInterface expected format
+    return data.map(q => ({
+      id: q.id,
+      question: q.question_text,
+      options: [q.option_a, q.option_b, q.option_c, q.option_d],
+      correctAnswer: q.correct_answer
+    }));
+  };
+
   // Get leaderboard
   const getLeaderboard = async (timeframe: 'weekly' | 'monthly' = 'weekly'): Promise<LeaderboardEntry[]> => {
     // First get user scores
@@ -278,6 +302,7 @@ export const useQuizData = () => {
     getLevelsForCategory,
     getUserLevelProgress,
     getLeaderboard,
+    getQuizQuestions,
     fetchUserCategoryScores,
     fetchUserTotalScore
   };

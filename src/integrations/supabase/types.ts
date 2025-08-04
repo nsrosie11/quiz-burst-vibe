@@ -144,6 +144,66 @@ export type Database = {
           },
         ]
       }
+      quiz_questions: {
+        Row: {
+          category_id: string
+          correct_answer: number
+          created_at: string
+          difficulty: string
+          id: string
+          level_id: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question_text: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          correct_answer: number
+          created_at?: string
+          difficulty: string
+          id?: string
+          level_id?: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question_text: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          correct_answer?: number
+          created_at?: string
+          difficulty?: string
+          id?: string
+          level_id?: string | null
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          question_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_questions_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_category_scores: {
         Row: {
           category_id: string
