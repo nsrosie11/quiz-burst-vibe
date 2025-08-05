@@ -90,11 +90,15 @@ export const useQuizData = () => {
       .from('user_total_scores')
       .select('total_score, global_rank')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
     if (data && !error) {
       setUserTotalScore(data.total_score || 0);
       setGlobalRank(data.global_rank || 0);
+    } else if (!data && !error) {
+      // No record found - set defaults
+      setUserTotalScore(0);
+      setGlobalRank(0);
     }
   };
 
@@ -107,11 +111,11 @@ export const useQuizData = () => {
       .select('category_id, reason')
       .eq('user_id', user.id)
       .eq('recommendation_date', new Date().toISOString().split('T')[0])
-      .single();
+      .maybeSingle();
     
     if (data && !error) {
       setDailyRecommendation(data);
-    } else {
+    } else if (!data && !error) {
       // Generate recommendation if none exists
       await generateDailyRecommendation();
     }
@@ -221,27 +225,40 @@ export const useQuizData = () => {
   };
 
   // Get quiz questions for category
-  const getQuizQuestions = async (categoryId: string, levelId?: string): Promise<any[]> => {
-    let query = supabase
-      .from('quiz_questions')
-      .select('*')
-      .eq('category_id', categoryId);
-    
-    if (levelId) {
-      query = query.eq('level_id', levelId);
+  const getQuizQuestions = async (categoryId: string, levelId?: string): Promise<{ id: string; question: string; options: string[]; correctAnswer: number; }[]> => {
+    try {
+      let query = supabase
+        .from('quiz_questions')
+        .select('*')
+        .eq('category_id', categoryId);
+      
+      if (levelId) {
+        query = query.eq('level_id', levelId);
+      }
+      
+      const { data, error } = await query.limit(5);
+      
+      if (error) {
+        console.error('Error fetching quiz questions:', error);
+        return [];
+      }
+      
+      if (!data || data.length === 0) {
+        console.warn('No questions found for category:', categoryId);
+        return [];
+      }
+      
+      // Transform to match QuizInterface expected format
+      return data.map(q => ({
+        id: q.id,
+        question: q.question_text,
+        options: [q.option_a, q.option_b, q.option_c, q.option_d],
+        correctAnswer: q.correct_answer
+      }));
+    } catch (err) {
+      console.error('Failed to fetch quiz questions:', err);
+      return [];
     }
-    
-    const { data, error } = await query.limit(5);
-    
-    if (error || !data) return [];
-    
-    // Transform to match QuizInterface expected format
-    return data.map(q => ({
-      id: q.id,
-      question: q.question_text,
-      options: [q.option_a, q.option_b, q.option_c, q.option_d],
-      correctAnswer: q.correct_answer
-    }));
   };
 
   // Get leaderboard

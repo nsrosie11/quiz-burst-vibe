@@ -6,7 +6,7 @@ import { Check, X, Clock, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
 import { useQuizData } from "@/hooks/useQuizData";
 
 interface Question {
-  id: number;
+  id: string;
   question: string;
   options: string[];
   correctAnswer: number;
@@ -26,16 +26,31 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   const [timeLeft, setTimeLeft] = useState(30);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { getQuizQuestions } = useQuizData();
 
   // Fetch questions from database
   useEffect(() => {
     const fetchQuestions = async () => {
-      setLoading(true);
-      const dbQuestions = await getQuizQuestions(category);
-      setQuestions(dbQuestions);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const dbQuestions = await getQuizQuestions(category);
+        
+        if (dbQuestions.length === 0) {
+          setError("Soal tidak tersedia untuk kategori ini, coba lagi nanti");
+          return;
+        }
+        
+        setQuestions(dbQuestions);
+      } catch (err) {
+        console.error('Error fetching questions:', err);
+        setError("Gagal memuat soal, coba lagi nanti");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchQuestions();
@@ -95,8 +110,21 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-fredoka text-foreground">Loading questions...</h2>
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <h2 className="text-xl font-fredoka text-foreground">Memuat soal...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-fredoka text-foreground">{error}</h2>
+          <Button onClick={onBack} variant="outline">Kembali</Button>
         </div>
       </div>
     );
@@ -107,8 +135,8 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-xl font-fredoka text-foreground">No questions available</h2>
-          <Button onClick={onBack}>Go Back</Button>
+          <h2 className="text-xl font-fredoka text-foreground">Soal tidak tersedia</h2>
+          <Button onClick={onBack} variant="outline">Kembali</Button>
         </div>
       </div>
     );
