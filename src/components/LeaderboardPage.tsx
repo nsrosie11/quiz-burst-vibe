@@ -108,7 +108,7 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
               />
               
               <div className="flex-1">
-                <h3 className={`font-bold text-lg ${isCurrentUser ? "text-white" : "text-foreground"}`}>
+                <h3 className={`font-bold text-lg ${isCurrentUser ? "text-black" : "text-foreground"}`}>
                   {leader.display_name}
                   {isCurrentUser && (
                     <Badge className="ml-2 bg-yellow-500 text-black">You</Badge>

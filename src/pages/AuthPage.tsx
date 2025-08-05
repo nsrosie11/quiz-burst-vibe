@@ -156,7 +156,7 @@ const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
             <Input
               id="email"
               type="email"
-              placeholder="nama@email.com"
+              placeholder="kitty@mejakita.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

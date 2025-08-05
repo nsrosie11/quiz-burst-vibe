@@ -43,7 +43,7 @@ const HomePage = ({ onStartQuiz, userName }: HomePageProps) => {
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pt-8">
+      <div className="flex items-center justify-between pt-2">
         <div className="flex items-center gap-3">
           <div>
           </div>

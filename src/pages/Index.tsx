@@ -174,9 +174,9 @@ const Index = () => {
       {/* Floating Leaderboard Image */}
       <button
         onClick={handleShowLeaderboard}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none z-50"
+        className="fixed bottom-6 right-6 w-22 h-14 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none z-50"
       >
-        <img src="/lovable-uploads/a1515326-a2f5-41ef-9358-eedee1e91640.png" alt="Trophy" className="w-14 h-14" />
+        <img src="/lovable-uploads/a1515326-a2f5-41ef-9358-eedee1e91640.png" alt="Trophy" className="w-24 h-17" />
       </button>
     </div>
   );

@@ -110,12 +110,9 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
               <p className="text-sm text-muted-foreground">Total Score</p>
               <p className="text-4xl font-bold text-foreground">{totalScore.toLocaleString()} pts</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-8 h-8 text-quiz-yellow" />
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-xl font-bold text-foreground">{completedLevels}/{levels.length}</p>
-              </div>
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Completed</p>
+              <p className="text-xl font-bold text-foreground">{completedLevels}/{levels.length}</p>
             </div>
           </div>
           
