@@ -16,9 +16,10 @@ interface QuizInterfaceProps {
   onQuizComplete: (score: number, totalQuestions: number) => void;
   onBack: () => void;
   category?: string;
+  levelId?: string;
 }
 
-const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInterfaceProps) => {
+const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }: QuizInterfaceProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -37,7 +38,8 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
         setLoading(true);
         setError(null);
         
-        const dbQuestions = await getQuizQuestions(category);
+        console.log('Fetching questions for category:', category, 'level:', levelId);
+        const dbQuestions = await getQuizQuestions(category, levelId);
         
         if (dbQuestions.length === 0) {
           setError("Soal tidak tersedia untuk kategori ini, coba lagi nanti");
@@ -54,7 +56,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
     };
 
     fetchQuestions();
-  }, [category, getQuizQuestions]);
+  }, [category, levelId, getQuizQuestions]);
 
   const currentQ = questions[currentQuestion];
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
