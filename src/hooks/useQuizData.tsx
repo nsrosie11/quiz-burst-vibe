@@ -90,15 +90,11 @@ export const useQuizData = () => {
       .from('user_total_scores')
       .select('total_score, global_rank')
       .eq('user_id', user.id)
-      .maybeSingle();
+      .single();
     
     if (data && !error) {
       setUserTotalScore(data.total_score || 0);
       setGlobalRank(data.global_rank || 0);
-    } else if (!data && !error) {
-      // No record found - set defaults
-      setUserTotalScore(0);
-      setGlobalRank(0);
     }
   };
 
@@ -111,11 +107,11 @@ export const useQuizData = () => {
       .select('category_id, reason')
       .eq('user_id', user.id)
       .eq('recommendation_date', new Date().toISOString().split('T')[0])
-      .maybeSingle();
+      .single();
     
     if (data && !error) {
       setDailyRecommendation(data);
-    } else if (!data && !error) {
+    } else {
       // Generate recommendation if none exists
       await generateDailyRecommendation();
     }
@@ -224,54 +220,6 @@ export const useQuizData = () => {
     return (data || []) as UserLevelProgress[];
   };
 
-  // Get quiz questions for category
-  const getQuizQuestions = async (categoryId: string, levelId?: string): Promise<{ id: string; question: string; options: string[]; correctAnswer: number; }[]> => {
-    try {
-      console.log('🔍 Fetching questions for:', { categoryId, levelId });
-      
-      let query = supabase
-        .from('quiz_questions')
-        .select('*')
-        .eq('category_id', categoryId);
-      
-      if (levelId) {
-        query = query.eq('level_id', levelId);
-        console.log('📝 Fetching level-specific questions');
-      } else {
-        console.log('📝 Fetching category-wide questions');
-      }
-      
-      const { data, error } = await query.limit(5);
-      
-      console.log('📊 Raw database response:', { data, error, count: data?.length });
-      
-      if (error) {
-        console.error('❌ Database error:', error);
-        return [];
-      }
-      
-      if (!data || data.length === 0) {
-        console.warn('⚠️ No questions found for:', { categoryId, levelId });
-        return [];
-      }
-      
-      // Transform to match QuizInterface expected format
-      const transformedQuestions = data.map(q => ({
-        id: q.id,
-        question: q.question_text,
-        options: [q.option_a, q.option_b, q.option_c, q.option_d],
-        correctAnswer: q.correct_answer
-      }));
-      
-      console.log('✅ Transformed questions:', transformedQuestions.length, 'questions ready');
-      return transformedQuestions;
-      
-    } catch (err) {
-      console.error('💥 Failed to fetch quiz questions:', err);
-      return [];
-    }
-  };
-
   // Get leaderboard
   const getLeaderboard = async (timeframe: 'weekly' | 'monthly' = 'weekly'): Promise<LeaderboardEntry[]> => {
     // First get user scores
@@ -330,7 +278,6 @@ export const useQuizData = () => {
     getLevelsForCategory,
     getUserLevelProgress,
     getLeaderboard,
-    getQuizQuestions,
     fetchUserCategoryScores,
     fetchUserTotalScore
   };

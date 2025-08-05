@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Check, X, Clock, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
-import { useQuizData } from "@/hooks/useQuizData";
 
 interface Question {
-  id: string;
+  id: number;
   question: string;
   options: string[];
   correctAnswer: number;
@@ -16,66 +15,219 @@ interface QuizInterfaceProps {
   onQuizComplete: (score: number, totalQuestions: number) => void;
   onBack: () => void;
   category?: string;
-  levelId?: string;
 }
 
-const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }: QuizInterfaceProps) => {
+const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInterfaceProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const { getQuizQuestions, completeLevel } = useQuizData();
-
-  // Fetch questions from database
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        console.log('🚀 QuizInterface: Starting to fetch questions');
-        setLoading(true);
-        setError(null);
-        
-        console.log('📋 QuizInterface params:', { category, levelId });
-        const dbQuestions = await getQuizQuestions(category, levelId);
-        
-        console.log('📦 QuizInterface received:', dbQuestions.length, 'questions');
-        
-        if (dbQuestions.length === 0) {
-          console.warn('❌ No questions received, setting error');
-          setError("Soal tidak tersedia untuk kategori ini, coba lagi nanti");
-          return;
+  const getQuestionsByCategory = (cat: string): Question[] => {
+    const questionBank = {
+      math: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 15 × 8?",
+          options: ["120", "125", "115", "130"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Jika x + 12 = 20, maka x = ?",
+          options: ["6", "8", "10", "12"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapakah akar kuadrat dari 144?",
+          options: ["10", "11", "12", "13"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Hasil dari 3² + 4² = ?",
+          options: ["25", "24", "26", "23"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Berapa persen dari 25% × 80?",
+          options: ["15", "20", "25", "30"],
+          correctAnswer: 1
         }
-        
-        console.log('✅ Setting questions to state');
-        setQuestions(dbQuestions);
-      } catch (err) {
-        console.error('💥 QuizInterface error:', err);
-        setError("Gagal memuat soal, coba lagi nanti");
-      } finally {
-        console.log('🏁 QuizInterface: Setting loading to false');
-        setLoading(false);
-      }
+      ],
+      history: [
+        {
+          id: 1,
+          question: "Siapa proklamator kemerdekaan Indonesia?",
+          options: ["Soekarno-Hatta", "Soeharto", "Habibie", "Megawati"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Kapan Indonesia merdeka?",
+          options: ["16 Agustus 1945", "17 Agustus 1945", "18 Agustus 1945", "15 Agustus 1945"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Siapa nama pahlawan wanita dari Aceh?",
+          options: ["Kartini", "Cut Nyak Dien", "Dewi Sartika", "Martha Christina Tiahahu"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Kerajaan Majapahit terletak di provinsi?",
+          options: ["Jawa Tengah", "Jawa Barat", "Jawa Timur", "Yogyakarta"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        }
+      ],
+      sports: [
+        {
+          id: 1,
+          question: "Berapa pemain dalam satu tim sepak bola?",
+          options: ["10", "11", "12", "9"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Olahraga bulu tangkis berasal dari negara?",
+          options: ["Indonesia", "China", "Inggris", "India"],
+          correctAnswer: 2
+        },
+        {
+          id: 3,
+          question: "Siapa atlet bulutangkis Indonesia yang paling terkenal?",
+          options: ["Taufik Hidayat", "Susi Susanti", "Liem Swie King", "Semua benar"],
+          correctAnswer: 3
+        },
+        {
+          id: 4,
+          question: "Berapa set maksimal dalam pertandingan tenis?",
+          options: ["3", "4", "5", "6"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Olimpiade modern pertama diadakan di?",
+          options: ["Paris", "London", "Athena", "Roma"],
+          correctAnswer: 2
+        }
+      ],
+      science: [
+        {
+          id: 1,
+          question: "Apa rumus kimia air?",
+          options: ["H2O", "CO2", "O2", "H2SO4"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Planet terdekat dengan matahari adalah?",
+          options: ["Venus", "Merkurius", "Bumi", "Mars"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Organ terbesar dalam tubuh manusia adalah?",
+          options: ["Hati", "Paru-paru", "Kulit", "Ginjal"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Siapa penemu listrik?",
+          options: ["Thomas Edison", "Benjamin Franklin", "Nikola Tesla", "Michael Faraday"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Proses fotosintesis terjadi di bagian?",
+          options: ["Akar", "Batang", "Daun", "Bunga"],
+          correctAnswer: 2
+        }
+      ],
+      general: [
+        {
+          id: 1,
+          question: "Ibu kota Indonesia adalah?",
+          options: ["Surabaya", "Jakarta", "Bandung", "Medan"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Hewan terbesar di dunia adalah?",
+          options: ["Gajah", "Paus Biru", "Jerapah", "Hiu"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa benua di dunia?",
+          options: ["5", "6", "7", "8"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Mata uang Indonesia adalah?",
+          options: ["Ringgit", "Rupiah", "Dong", "Baht"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Negara dengan populasi terbesar di dunia?",
+          options: ["India", "China", "Amerika", "Indonesia"],
+          correctAnswer: 1
+        }
+      ],
+      random: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 12 + 8?",
+          options: ["18", "20", "22", "24"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa pemain dalam tim basket?",
+          options: ["4", "5", "6", "7"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Apa rumus kimia garam?",
+          options: ["NaCl", "H2O", "CO2", "O2"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Negara terkecil di dunia adalah?",
+          options: ["Monaco", "Vatikan", "San Marino", "Liechtenstein"],
+          correctAnswer: 1
+        }
+      ]
     };
+    
+    return questionBank[cat as keyof typeof questionBank] || questionBank.random;
+  };
 
-    fetchQuestions();
-  }, [category, levelId, getQuizQuestions]);
+  const questions = getQuestionsByCategory(category);
 
   const currentQ = questions[currentQuestion];
-  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  console.log('🎯 Current state:', { 
-    loading, 
-    error, 
-    questionsCount: questions.length, 
-    currentQuestion, 
-    currentQ: currentQ ? 'exists' : 'missing' 
-  });
-
-  // Timer effect - must be declared before any early returns
   useEffect(() => {
     if (timeLeft > 0 && !showFeedback) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
@@ -103,12 +255,6 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }:
       setShowFeedback(false);
       setTimeLeft(30);
     } else {
-      // Save progress to database if levelId is provided
-      if (levelId) {
-        const finalScore = score * 20; // Convert to points (each correct = 20 points)
-        completeLevel(levelId, finalScore);
-        console.log('🎯 Level completed! Score saved:', finalScore);
-      }
       onQuizComplete(score, questions.length);
     }
   };
@@ -120,61 +266,13 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }:
         : "bg-card hover:bg-muted";
     }
     
-    if (currentQ && index === currentQ.correctAnswer) {
+    if (index === currentQ.correctAnswer) {
       return "bg-success text-success-foreground";
-    } else if (index === selectedAnswer && currentQ && selectedAnswer !== currentQ.correctAnswer) {
+    } else if (index === selectedAnswer && selectedAnswer !== currentQ.correctAnswer) {
       return "bg-destructive text-destructive-foreground";
     }
     return "bg-muted";
   };
-
-  // Handle loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <h2 className="text-xl font-fredoka text-foreground">Memuat soal...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-fredoka text-foreground">{error}</h2>
-          <Button onClick={onBack} variant="outline">Kembali</Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle no questions state
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-fredoka text-foreground">Soal tidak tersedia</h2>
-          <Button onClick={onBack} variant="outline">Kembali</Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle invalid current question
-  if (!currentQ) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-fredoka text-foreground">Error loading question</h2>
-          <Button onClick={onBack}>Go Back</Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
