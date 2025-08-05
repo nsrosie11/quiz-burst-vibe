@@ -110,7 +110,7 @@ const Index = () => {
         onQuizComplete={handleQuizComplete}
         onBack={handleBackToHome}
         category={currentCategory}
-        levelId={selectedLevelId}
+        levelId={selectedLevelId || undefined}
       />
     );
   }

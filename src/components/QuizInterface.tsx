@@ -29,28 +29,34 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { getQuizQuestions } = useQuizData();
+  const { getQuizQuestions, completeLevel } = useQuizData();
 
   // Fetch questions from database
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
+        console.log('🚀 QuizInterface: Starting to fetch questions');
         setLoading(true);
         setError(null);
         
-        console.log('Fetching questions for category:', category, 'level:', levelId);
+        console.log('📋 QuizInterface params:', { category, levelId });
         const dbQuestions = await getQuizQuestions(category, levelId);
         
+        console.log('📦 QuizInterface received:', dbQuestions.length, 'questions');
+        
         if (dbQuestions.length === 0) {
+          console.warn('❌ No questions received, setting error');
           setError("Soal tidak tersedia untuk kategori ini, coba lagi nanti");
           return;
         }
         
+        console.log('✅ Setting questions to state');
         setQuestions(dbQuestions);
       } catch (err) {
-        console.error('Error fetching questions:', err);
+        console.error('💥 QuizInterface error:', err);
         setError("Gagal memuat soal, coba lagi nanti");
       } finally {
+        console.log('🏁 QuizInterface: Setting loading to false');
         setLoading(false);
       }
     };
@@ -60,6 +66,14 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }:
 
   const currentQ = questions[currentQuestion];
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
+
+  console.log('🎯 Current state:', { 
+    loading, 
+    error, 
+    questionsCount: questions.length, 
+    currentQuestion, 
+    currentQ: currentQ ? 'exists' : 'missing' 
+  });
 
   // Timer effect - must be declared before any early returns
   useEffect(() => {
@@ -89,6 +103,12 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random", levelId }:
       setShowFeedback(false);
       setTimeLeft(30);
     } else {
+      // Save progress to database if levelId is provided
+      if (levelId) {
+        const finalScore = score * 20; // Convert to points (each correct = 20 points)
+        completeLevel(levelId, finalScore);
+        console.log('🎯 Level completed! Score saved:', finalScore);
+      }
       onQuizComplete(score, questions.length);
     }
   };
