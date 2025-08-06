@@ -18,7 +18,6 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
   const { user } = useAuth();
   const [weeklyLeaders, setWeeklyLeaders] = useState<LeaderboardEntry[]>([]);
   const [monthlyLeaders, setMonthlyLeaders] = useState<LeaderboardEntry[]>([]);
-  const [topChampions, setTopChampions] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,9 +27,6 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
         getLeaderboard('weekly'),
         getLeaderboard('monthly')
       ]);
-      
-      // Get top 3 champions from weekly data
-      setTopChampions(weekly.slice(0, 3));
       
       // Add current user if not in top rankings
       const ensureCurrentUser = (leaders: LeaderboardEntry[]) => {
@@ -157,57 +153,46 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
       {/* Top 3 Podium */}
       <Card className="p-6 bg-card shadow-quiz border-0">
         <h2 className="text-xl font-bold text-foreground mb-4 text-center">Top Champions</h2>
-        {topChampions.length > 0 ? (
-          <div className="flex justify-center items-end gap-4">
-            {/* 2nd Place */}
-            {topChampions.length >= 2 && (
-              <div className="text-center">
-                <div className="relative">
-                  <img src={avatar2} alt="2nd place" className="w-16 h-16 rounded-full border-4 border-gray-300 shadow-lg" />
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">2</span>
-                  </div>
-                </div>
-                <p className="font-bold text-foreground mt-2">{topChampions[1].display_name}</p>
-                <p className="text-sm text-muted-foreground">{topChampions[1].total_score.toLocaleString()} pts</p>
-                <div className="w-20 h-16 bg-gray-300 rounded-t-lg mt-2"></div>
+        <div className="flex justify-center items-end gap-4">
+          {/* 2nd Place */}
+          <div className="text-center">
+            <div className="relative">
+              <img src={avatar2} alt="2nd place" className="w-16 h-16 rounded-full border-4 border-gray-300 shadow-lg" />
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">2</span>
               </div>
-            )}
-
-            {/* 1st Place */}
-            <div className="text-center">
-              <div className="relative">
-                <img src={avatar1} alt="1st place" className="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-lg" />
-                <div className="absolute -top-3 -right-3 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-white" />
-                </div>
-              </div>
-              <p className="font-bold text-foreground mt-2">{topChampions[0].display_name}</p>
-              <p className="text-sm text-muted-foreground">{topChampions[0].total_score.toLocaleString()} pts</p>
-              <div className="w-20 h-20 bg-yellow-400 rounded-t-lg mt-2"></div>
             </div>
+            <p className="font-bold text-foreground mt-2">Sarah</p>
+            <p className="text-sm text-muted-foreground">2,654 pts</p>
+            <div className="w-20 h-16 bg-gray-300 rounded-t-lg mt-2"></div>
+          </div>
 
-            {/* 3rd Place */}
-            {topChampions.length >= 3 && (
-              <div className="text-center">
-                <div className="relative">
-                  <img src={avatar1} alt="3rd place" className="w-16 h-16 rounded-full border-4 border-amber-500 shadow-lg" />
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">3</span>
-                  </div>
-                </div>
-                <p className="font-bold text-foreground mt-2">{topChampions[2].display_name}</p>
-                <p className="text-sm text-muted-foreground">{topChampions[2].total_score.toLocaleString()} pts</p>
-                <div className="w-20 h-12 bg-amber-500 rounded-t-lg mt-2"></div>
+          {/* 1st Place */}
+          <div className="text-center">
+            <div className="relative">
+              <img src={avatar1} alt="1st place" className="w-20 h-20 rounded-full border-4 border-yellow-400 shadow-lg" />
+              <div className="absolute -top-3 -right-3 w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                <Crown className="w-5 h-5 text-white" />
               </div>
-            )}
+            </div>
+            <p className="font-bold text-foreground mt-2">Alex</p>
+            <p className="text-sm text-muted-foreground">2,847 pts</p>
+            <div className="w-20 h-20 bg-yellow-400 rounded-t-lg mt-2"></div>
           </div>
-        ) : (
-          <div className="text-center text-muted-foreground py-8">
-            <Trophy className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No champions yet. Be the first!</p>
+
+          {/* 3rd Place */}
+          <div className="text-center">
+            <div className="relative">
+              <img src={avatar1} alt="3rd place" className="w-16 h-16 rounded-full border-4 border-amber-500 shadow-lg" />
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">3</span>
+              </div>
+            </div>
+            <p className="font-bold text-foreground mt-2">Mike</p>
+            <p className="text-sm text-muted-foreground">2,341 pts</p>
+            <div className="w-20 h-12 bg-amber-500 rounded-t-lg mt-2"></div>
           </div>
-        )}
+        </div>
       </Card>
 
       {/* Leaderboard Tabs */}

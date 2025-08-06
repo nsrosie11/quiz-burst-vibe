@@ -109,8 +109,7 @@ const Index = () => {
       <QuizInterface 
         onQuizComplete={handleQuizComplete}
         onBack={handleBackToHome}
-        categoryId={currentCategory}
-        levelId={selectedLevelId}
+        category={currentCategory}
       />
     );
   }

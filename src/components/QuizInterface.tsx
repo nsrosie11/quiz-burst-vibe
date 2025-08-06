@@ -3,75 +3,230 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Check, X, Clock, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
-import { useQuizData } from "@/hooks/useQuizData";
-import { useAuth } from "@/hooks/useAuth";
 
 interface Question {
-  id: string;
-  question_text: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_answer: number;
+  id: number;
+  question: string;
+  options: string[];
+  correctAnswer: number;
 }
 
 interface QuizInterfaceProps {
   onQuizComplete: (score: number, totalQuestions: number) => void;
   onBack: () => void;
-  categoryId?: string;
-  levelId?: string;
+  category?: string;
 }
 
-const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInterfaceProps) => {
-  const { getQuizQuestions, completeLevel } = useQuizData();
-  const { user } = useAuth();
+const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInterfaceProps) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Load questions from database
-  useEffect(() => {
-    const loadQuestions = async () => {
-      if (!categoryId || !levelId) {
-        setError("Kategori atau level tidak valid");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        console.log("Loading questions for category:", categoryId, "level:", levelId);
-        const fetchedQuestions = await getQuizQuestions(categoryId, levelId);
-        console.log("Fetched questions:", fetchedQuestions);
-        
-        if (!fetchedQuestions || fetchedQuestions.length === 0) {
-          setError("Soal tidak ditemukan untuk kategori ini");
-          setLoading(false);
-          return;
+  const getQuestionsByCategory = (cat: string): Question[] => {
+    const questionBank = {
+      math: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 15 × 8?",
+          options: ["120", "125", "115", "130"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Jika x + 12 = 20, maka x = ?",
+          options: ["6", "8", "10", "12"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapakah akar kuadrat dari 144?",
+          options: ["10", "11", "12", "13"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Hasil dari 3² + 4² = ?",
+          options: ["25", "24", "26", "23"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Berapa persen dari 25% × 80?",
+          options: ["15", "20", "25", "30"],
+          correctAnswer: 1
         }
-
-        setQuestions(fetchedQuestions);
-        setError(null);
-      } catch (err) {
-        console.error("Error loading questions:", err);
-        setError("Gagal memuat soal, coba lagi nanti");
-      } finally {
-        setLoading(false);
-      }
+      ],
+      history: [
+        {
+          id: 1,
+          question: "Siapa proklamator kemerdekaan Indonesia?",
+          options: ["Soekarno-Hatta", "Soeharto", "Habibie", "Megawati"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Kapan Indonesia merdeka?",
+          options: ["16 Agustus 1945", "17 Agustus 1945", "18 Agustus 1945", "15 Agustus 1945"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Siapa nama pahlawan wanita dari Aceh?",
+          options: ["Kartini", "Cut Nyak Dien", "Dewi Sartika", "Martha Christina Tiahahu"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Kerajaan Majapahit terletak di provinsi?",
+          options: ["Jawa Tengah", "Jawa Barat", "Jawa Timur", "Yogyakarta"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        }
+      ],
+      sports: [
+        {
+          id: 1,
+          question: "Berapa pemain dalam satu tim sepak bola?",
+          options: ["10", "11", "12", "9"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Olahraga bulu tangkis berasal dari negara?",
+          options: ["Indonesia", "China", "Inggris", "India"],
+          correctAnswer: 2
+        },
+        {
+          id: 3,
+          question: "Siapa atlet bulutangkis Indonesia yang paling terkenal?",
+          options: ["Taufik Hidayat", "Susi Susanti", "Liem Swie King", "Semua benar"],
+          correctAnswer: 3
+        },
+        {
+          id: 4,
+          question: "Berapa set maksimal dalam pertandingan tenis?",
+          options: ["3", "4", "5", "6"],
+          correctAnswer: 2
+        },
+        {
+          id: 5,
+          question: "Olimpiade modern pertama diadakan di?",
+          options: ["Paris", "London", "Athena", "Roma"],
+          correctAnswer: 2
+        }
+      ],
+      science: [
+        {
+          id: 1,
+          question: "Apa rumus kimia air?",
+          options: ["H2O", "CO2", "O2", "H2SO4"],
+          correctAnswer: 0
+        },
+        {
+          id: 2,
+          question: "Planet terdekat dengan matahari adalah?",
+          options: ["Venus", "Merkurius", "Bumi", "Mars"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Organ terbesar dalam tubuh manusia adalah?",
+          options: ["Hati", "Paru-paru", "Kulit", "Ginjal"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Siapa penemu listrik?",
+          options: ["Thomas Edison", "Benjamin Franklin", "Nikola Tesla", "Michael Faraday"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Proses fotosintesis terjadi di bagian?",
+          options: ["Akar", "Batang", "Daun", "Bunga"],
+          correctAnswer: 2
+        }
+      ],
+      general: [
+        {
+          id: 1,
+          question: "Ibu kota Indonesia adalah?",
+          options: ["Surabaya", "Jakarta", "Bandung", "Medan"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Hewan terbesar di dunia adalah?",
+          options: ["Gajah", "Paus Biru", "Jerapah", "Hiu"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa benua di dunia?",
+          options: ["5", "6", "7", "8"],
+          correctAnswer: 2
+        },
+        {
+          id: 4,
+          question: "Mata uang Indonesia adalah?",
+          options: ["Ringgit", "Rupiah", "Dong", "Baht"],
+          correctAnswer: 1
+        },
+        {
+          id: 5,
+          question: "Negara dengan populasi terbesar di dunia?",
+          options: ["India", "China", "Amerika", "Indonesia"],
+          correctAnswer: 1
+        }
+      ],
+      random: [
+        {
+          id: 1,
+          question: "Berapakah hasil dari 12 + 8?",
+          options: ["18", "20", "22", "24"],
+          correctAnswer: 1
+        },
+        {
+          id: 2,
+          question: "Siapa presiden pertama Indonesia?",
+          options: ["Soeharto", "Soekarno", "Habibie", "Megawati"],
+          correctAnswer: 1
+        },
+        {
+          id: 3,
+          question: "Berapa pemain dalam tim basket?",
+          options: ["4", "5", "6", "7"],
+          correctAnswer: 1
+        },
+        {
+          id: 4,
+          question: "Apa rumus kimia garam?",
+          options: ["NaCl", "H2O", "CO2", "O2"],
+          correctAnswer: 0
+        },
+        {
+          id: 5,
+          question: "Negara terkecil di dunia adalah?",
+          options: ["Monaco", "Vatikan", "San Marino", "Liechtenstein"],
+          correctAnswer: 1
+        }
+      ]
     };
+    
+    return questionBank[cat as keyof typeof questionBank] || questionBank.random;
+  };
 
-    loadQuestions();
-  }, [categoryId, levelId, getQuizQuestions]);
+  const questions = getQuestionsByCategory(category);
 
   const currentQ = questions[currentQuestion];
-  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
-  const options = currentQ ? [currentQ.option_a, currentQ.option_b, currentQ.option_c, currentQ.option_d] : [];
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   useEffect(() => {
     if (timeLeft > 0 && !showFeedback) {
@@ -88,34 +243,19 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInte
     setSelectedAnswer(answerIndex);
     setShowFeedback(true);
     
-    if (answerIndex === currentQ.correct_answer) {
+    if (answerIndex === currentQ.correctAnswer) {
       setScore(score + 1);
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowFeedback(false);
       setTimeLeft(30);
     } else {
-      // Save progress to database before completing
-      if (levelId && user) {
-        const finalScore = selectedAnswer === currentQ.correct_answer ? score + 1 : score;
-        const pointsEarned = Math.round((finalScore / questions.length) * 100); // Convert to points out of 100
-        
-        try {
-          await completeLevel(levelId, pointsEarned);
-          console.log("Level completed, points saved:", pointsEarned);
-        } catch (error) {
-          console.error("Error saving level completion:", error);
-        }
-        
-        onQuizComplete(finalScore, questions.length);
-      } else {
-        onQuizComplete(score, questions.length);
-      }
+      onQuizComplete(score, questions.length);
     }
   };
 
@@ -126,57 +266,13 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInte
         : "bg-card hover:bg-muted";
     }
     
-    if (index === currentQ.correct_answer) {
+    if (index === currentQ.correctAnswer) {
       return "bg-success text-success-foreground";
-    } else if (index === selectedAnswer && selectedAnswer !== currentQ.correct_answer) {
+    } else if (index === selectedAnswer && selectedAnswer !== currentQ.correctAnswer) {
       return "bg-destructive text-destructive-foreground";
     }
     return "bg-muted";
   };
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <Card className="p-8 bg-card text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-foreground">Loading questions...</p>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <Card className="p-8 bg-card text-center">
-          <X className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Oops!</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={onBack} variant="outline">
-            Kembali
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show no questions state
-  if (questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
-        <Card className="p-8 bg-card text-center">
-          <Trophy className="w-12 h-12 text-warning mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Soal Belum Tersedia</h2>
-          <p className="text-muted-foreground mb-4">Soal untuk kategori ini belum tersedia. Coba lagi nanti!</p>
-          <Button onClick={onBack} variant="outline">
-            Kembali
-          </Button>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
@@ -191,7 +287,7 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInte
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground font-fredoka">Quiz Level</h1>
+          <h1 className="text-2xl font-bold text-foreground font-fredoka">Kategori {category}</h1>
           <div className="flex justify-center items-center gap-2 text-foreground mt-2">
             <Clock className="w-5 h-5" />
             <span className="text-lg font-nunito font-bold">{timeLeft}s</span>
@@ -211,11 +307,11 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInte
       {/* Question */}
       <Card className="p-6 bg-card">
         <h2 className="text-2xl font-fredoka font-semibold text-foreground mb-6">
-          {currentQ.question_text}
+          {currentQ.question}
         </h2>
         
         <div className="space-y-3">
-          {options.map((option, index) => (
+          {currentQ.options.map((option, index) => (
             <Button
               key={index}
               variant="ghost"
@@ -227,10 +323,10 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId, levelId }: QuizInte
                 <span className="text-lg font-nunito">{option}</span>
                 {showFeedback && (
                   <>
-                    {index === currentQ.correct_answer && (
+                    {index === currentQ.correctAnswer && (
                       <Check className="w-6 h-6 text-green-600" />
                     )}
-                    {index === selectedAnswer && selectedAnswer !== currentQ.correct_answer && (
+                    {index === selectedAnswer && selectedAnswer !== currentQ.correctAnswer && (
                       <X className="w-6 h-6 text-red-600" />
                     )}
                   </>
