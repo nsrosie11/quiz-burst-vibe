@@ -220,43 +220,61 @@ export const useQuizData = () => {
     return (data || []) as UserLevelProgress[];
   };
 
-  // Get quiz questions for a specific category and level - using raw SQL for now
+  // Get quiz questions for a specific category and level - using fallback for now
   const getQuizQuestions = async (categoryId: string, levelId?: string) => {
     console.log("Fetching questions for category:", categoryId, "level:", levelId);
     
-    // Use RPC call to get questions since quiz_questions table isn't in types yet
-    const { data, error } = await supabase.rpc('get_quiz_questions', {
-      p_category_id: categoryId,
-      p_level_id: levelId
-    });
+    // Return mock questions for now until types are updated
+    const mockQuestions = [
+      {
+        id: '1',
+        question_text: 'What is 2 + 2?',
+        option_a: '3',
+        option_b: '4',
+        option_c: '5',
+        option_d: '6',
+        correct_answer: 1
+      },
+      {
+        id: '2',
+        question_text: 'What is the capital of France?',
+        option_a: 'London',
+        option_b: 'Berlin',
+        option_c: 'Paris',
+        option_d: 'Madrid',
+        correct_answer: 2
+      },
+      {
+        id: '3',
+        question_text: 'What is 10 - 3?',
+        option_a: '6',
+        option_b: '7',
+        option_c: '8',
+        option_d: '9',
+        correct_answer: 1
+      },
+      {
+        id: '4',
+        question_text: 'Which planet is closest to the Sun?',
+        option_a: 'Venus',
+        option_b: 'Earth',
+        option_c: 'Mercury',
+        option_d: 'Mars',
+        correct_answer: 2
+      },
+      {
+        id: '5',
+        question_text: 'What is 15 ÷ 3?',
+        option_a: '4',
+        option_b: '5',
+        option_c: '6',
+        option_d: '7',
+        correct_answer: 1
+      }
+    ];
     
-    if (error) {
-      console.error("Error fetching questions:", error);
-      // Fallback: return mock questions for now
-      return [
-        {
-          id: '1',
-          question_text: 'What is 2 + 2?',
-          option_a: '3',
-          option_b: '4',
-          option_c: '5',
-          option_d: '6',
-          correct_answer: 1
-        },
-        {
-          id: '2',
-          question_text: 'What is the capital of France?',
-          option_a: 'London',
-          option_b: 'Berlin',
-          option_c: 'Paris',
-          option_d: 'Madrid',
-          correct_answer: 2
-        }
-      ];
-    }
-    
-    console.log("Questions fetched:", data);
-    return data || [];
+    console.log("Questions fetched:", mockQuestions);
+    return mockQuestions;
   };
 
   // Get leaderboard
