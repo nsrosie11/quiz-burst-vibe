@@ -220,6 +220,30 @@ export const useQuizData = () => {
     return (data || []) as UserLevelProgress[];
   };
 
+  // Get quiz questions for a specific category and level
+  const getQuizQuestions = async (categoryId: string, levelId?: string) => {
+    console.log("Fetching questions for category:", categoryId, "level:", levelId);
+    
+    let query = supabase
+      .from('quiz_questions')
+      .select('*')
+      .eq('category_id', categoryId);
+    
+    if (levelId) {
+      query = query.eq('level_id', levelId);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching questions:", error);
+      throw error;
+    }
+    
+    console.log("Questions fetched:", data);
+    return data || [];
+  };
+
   // Get leaderboard
   const getLeaderboard = async (timeframe: 'weekly' | 'monthly' = 'weekly'): Promise<LeaderboardEntry[]> => {
     // First get user scores
@@ -277,6 +301,7 @@ export const useQuizData = () => {
     completeLevel,
     getLevelsForCategory,
     getUserLevelProgress,
+    getQuizQuestions,
     getLeaderboard,
     fetchUserCategoryScores,
     fetchUserTotalScore
