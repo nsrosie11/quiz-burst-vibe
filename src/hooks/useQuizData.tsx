@@ -188,6 +188,45 @@ export const useQuizData = () => {
     }
   };
 
+  // Save category progress (for non-level based quizzes)
+  const saveCategoryProgress = async (categoryId: string, score: number, totalQuestions: number) => {
+    if (!user) return;
+
+    // Initialize category progress if it doesn't exist
+    await initializeCategoryProgress(categoryId);
+
+    // Update category score
+    const { error } = await supabase
+      .from('user_category_scores')
+      .upsert({
+        user_id: user.id,
+        category_id: categoryId,
+        total_score: score,
+        levels_completed: 1,
+        last_played_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,category_id'
+      });
+
+    // Update total user score
+    if (!error) {
+      await supabase
+        .from('user_total_scores')
+        .upsert({
+          user_id: user.id,
+          total_score: score
+        }, {
+          onConflict: 'user_id'
+        });
+
+      // Refresh data
+      await Promise.all([
+        fetchUserCategoryScores(),
+        fetchUserTotalScore()
+      ]);
+    }
+  };
+
   // Get levels for category
   const getLevelsForCategory = async (categoryId: string): Promise<QuizLevel[]> => {
     const { data, error } = await supabase
@@ -275,6 +314,7 @@ export const useQuizData = () => {
     loading,
     initializeCategoryProgress,
     completeLevel,
+    saveCategoryProgress,
     getLevelsForCategory,
     getUserLevelProgress,
     getLeaderboard,

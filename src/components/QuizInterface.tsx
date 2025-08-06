@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Check, X, Clock, ArrowRight, ArrowLeft, Trophy } from "lucide-react";
+import { useQuizData } from "@/hooks/useQuizData";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface Question {
   id: number;
@@ -18,11 +21,14 @@ interface QuizInterfaceProps {
 }
 
 const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInterfaceProps) => {
+  const { user } = useAuth();
+  const { saveCategoryProgress } = useQuizData();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [isSaving, setIsSaving] = useState(false);
 
   const getQuestionsByCategory = (cat: string): Question[] => {
     const questionBank = {
@@ -248,13 +254,26 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setShowFeedback(false);
       setTimeLeft(30);
     } else {
+      // Quiz completed - save progress to database
+      if (user) {
+        setIsSaving(true);
+        try {
+          await saveCategoryProgress(category, score, questions.length);
+          toast.success(`Quiz selesai! Skor Anda: ${score}/${questions.length}`);
+        } catch (error) {
+          toast.error("Gagal menyimpan progress");
+          console.error("Error saving progress:", error);
+        } finally {
+          setIsSaving(false);
+        }
+      }
       onQuizComplete(score, questions.length);
     }
   };
@@ -344,6 +363,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
             variant="mejakia" 
             size="lg" 
             onClick={handleNext}
+            disabled={isSaving}
             className="w-full max-w-xs"
           >
             {currentQuestion < questions.length - 1 ? (
@@ -352,7 +372,7 @@ const QuizInterface = ({ onQuizComplete, onBack, category = "random" }: QuizInte
                 <ArrowRight className="w-5 h-5" />
               </>
             ) : (
-              "Finish Quiz"
+              isSaving ? "Menyimpan..." : "Finish Quiz"
             )}
           </Button>
         </div>
