@@ -24,8 +24,8 @@ const LeaderboardPage = ({ onBack }: LeaderboardPageProps) => {
     const loadLeaderboards = async () => {
       setLoading(true);
       const [weekly, monthly] = await Promise.all([
-        getLeaderboard('weekly'),
-        getLeaderboard('monthly')
+        getLeaderboard(),
+        getLeaderboard()
       ]);
       
       // Add current user if not in top rankings

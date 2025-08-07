@@ -109,7 +109,8 @@ const Index = () => {
       <QuizInterface 
         onQuizComplete={handleQuizComplete}
         onBack={handleBackToHome}
-        category={currentCategory}
+        categoryId={currentCategory}
+        levelId={selectedLevelId}
       />
     );
   }
@@ -125,8 +126,14 @@ const Index = () => {
       <QuizSummary 
         score={quizScore}
         totalQuestions={totalQuestions}
+        categoryId={currentCategory}
+        currentLevelId={selectedLevelId}
         onPlayAgain={handlePlayAgain}
         onBackToHome={handleBackToHome}
+        onNextLevel={(nextLevelId) => {
+          setSelectedLevelId(nextLevelId);
+          setCurrentScreen("quiz");
+        }}
       />
     );
   }

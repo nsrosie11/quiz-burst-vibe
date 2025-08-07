@@ -8,7 +8,7 @@ import { useQuizData, QuizLevel, UserLevelProgress } from "@/hooks/useQuizData";
 interface Level {
   id: string;
   name: string;
-  status: 'locked' | 'current' | 'completed';
+  status: 'available' | 'current' | 'completed';
   points: number;
   maxPoints: number;
   level_number: number;
@@ -39,10 +39,20 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
 
       const levelsWithProgress = quizLevels.map(level => {
         const progress = userProgress.find(p => p.level_id === level.id);
+        let status: 'available' | 'current' | 'completed' = 'available';
+        
+        if (progress?.status === 'completed') {
+          status = 'completed';
+        } else if (progress?.status === 'current') {
+          status = 'current';
+        } else {
+          status = 'available'; // All levels are available by default
+        }
+        
         return {
           id: level.id,
           name: level.name,
-          status: progress?.status || 'locked',
+          status,
           points: progress?.score || 0,
           maxPoints: level.max_points,
           level_number: level.level_number
@@ -66,8 +76,8 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
         return <CheckCircle className="w-6 h-6 text-green-500" />;
       case 'current':
         return <Play className="w-6 h-6 text-white" />;
-      case 'locked':
-        return <Lock className="w-5 h-5 text-gray-400" />;
+      case 'available':
+        return <Play className="w-6 h-6 text-white" />;
     }
   };
 
@@ -76,9 +86,9 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       case 'completed':
         return "bg-green-500 hover:bg-green-600 text-white shadow-quiz";
       case 'current':
-        return "bg-red-500 hover:bg-red-600 text-white shadow-glow";
-      case 'locked':
-        return "bg-gray-200 text-gray-400 cursor-not-allowed";
+        return "bg-mejakia-primary hover:bg-mejakia-primary/90 text-white shadow-glow";
+      case 'available':
+        return "bg-primary hover:bg-primary/90 text-white shadow-quiz";
     }
   };
 
@@ -135,7 +145,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
             <Card 
               key={level.id}
               className={`p-4 cursor-pointer transition-all border-0 ${getLevelCardClass(level.status)}`}
-              onClick={() => level.status !== 'locked' && onStartLevel(category.id, level.id)}
+              onClick={() => onStartLevel(category.id, level.id)}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20">
@@ -150,10 +160,10 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
                     </div>
                   )}
                   {level.status === 'current' && (
-                    <p className="text-sm opacity-90 mt-1">Start now!</p>
+                    <p className="text-sm opacity-90 mt-1">▶️ Current</p>
                   )}
-                  {level.status === 'locked' && (
-                    <p className="text-xs mt-1">Complete Level {index} first</p>
+                  {level.status === 'available' && (
+                    <p className="text-sm opacity-90 mt-1">🔓 Available</p>
                   )}
                 </div>
               </div>
