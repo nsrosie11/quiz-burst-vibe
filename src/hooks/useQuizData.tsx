@@ -58,41 +58,32 @@ export const useQuizData = () => {
 
   // Fetch categories
   const fetchCategories = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('quiz_categories')
       .select('*')
       .order('name');
-    
-    if (data && !error) {
-      setCategories(data);
-    }
+    if (data) setCategories(data);
   };
 
   // Fetch user category scores
   const fetchUserCategoryScores = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('user_category_scores')
       .select('*')
       .eq('user_id', user.id);
-    
-    if (data && !error) {
-      setUserCategoryScores(data);
-    }
+    if (data) setUserCategoryScores(data);
   };
 
   // Fetch user total score and rank
   const fetchUserTotalScore = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('user_total_scores')
       .select('total_score, global_rank')
       .eq('user_id', user.id)
       .single();
-    
-    if (data && !error) {
+    if (data) {
       setUserTotalScore(data.total_score || 0);
       setGlobalRank(data.global_rank || 0);
     }
@@ -101,18 +92,16 @@ export const useQuizData = () => {
   // Fetch daily recommendation
   const fetchDailyRecommendation = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('daily_recommendations')
       .select('category_id, reason')
       .eq('user_id', user.id)
       .eq('recommendation_date', new Date().toISOString().split('T')[0])
       .single();
-    
-    if (data && !error) {
+
+    if (data) {
       setDailyRecommendation(data);
     } else {
-      // Generate recommendation if none exists
       await generateDailyRecommendation();
     }
   };
@@ -121,8 +110,7 @@ export const useQuizData = () => {
   const generateDailyRecommendation = async () => {
     if (!user) return;
 
-    // Find categories user hasn't played or has lowest progress
-    const unplayedCategories = categories.filter(cat => 
+    const unplayedCategories = categories.filter(cat =>
       !userCategoryScores.find(score => score.category_id === cat.id)
     );
 
@@ -133,8 +121,7 @@ export const useQuizData = () => {
       recommendedCategory = unplayedCategories[Math.floor(Math.random() * unplayedCategories.length)];
       reason = "Try something new today!";
     } else {
-      // Find category with lowest progress
-      const categoryWithLowestProgress = userCategoryScores.reduce((min, score) => 
+      const categoryWithLowestProgress = userCategoryScores.reduce((min, score) =>
         score.levels_completed < min.levels_completed ? score : min
       );
       recommendedCategory = categories.find(cat => cat.id === categoryWithLowestProgress.category_id);
@@ -161,88 +148,142 @@ export const useQuizData = () => {
   // Initialize user progress for a category
   const initializeCategoryProgress = async (categoryId: string) => {
     if (!user) return;
-
-    const { error } = await supabase.rpc('initialize_user_category_progress', {
+    await supabase.rpc('initialize_user_category_progress', {
       p_user_id: user.id,
       p_category_id: categoryId
     });
-
-    if (!error) {
-      fetchUserCategoryScores();
-    }
+    fetchUserCategoryScores();
   };
 
-  // Complete a level
+  // ✅ Complete a level + unlock next level
   const completeLevel = async (levelId: string, score: number) => {
     if (!user) return;
 
-    const { error } = await supabase.rpc('complete_level', {
-      p_user_id: user.id,
-      p_level_id: levelId,
-      p_score: score
-    });
+    // 1. Tandai level sekarang jadi completed
+    await supabase
+      .from('user_level_progress')
+      .upsert({
+        user_id: user.id,
+        level_id: levelId,
+        status: 'completed',
+        score,
+        max_score: score,
+        completed_at: new Date().toISOString()
+      }, { onConflict: 'user_id, level_id' });
 
-    if (!error) {
-      fetchUserCategoryScores();
-      fetchUserTotalScore();
+    // 2. Ambil info level sekarang
+    const { data: currentLevel } = await supabase
+      .from('quiz_levels')
+      .select('category_id, level_number')
+      .eq('id', levelId)
+      .single();
+
+    if (currentLevel) {
+      // 3. Cari level berikutnya
+      const { data: nextLevel } = await supabase
+        .from('quiz_levels')
+        .select('id')
+        .eq('category_id', currentLevel.category_id)
+        .eq('level_number', currentLevel.level_number + 1)
+        .single();
+
+      if (nextLevel) {
+        // 4. Cek progress user di level berikutnya
+        const { data: existingProgress } = await supabase
+          .from('user_level_progress')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('level_id', nextLevel.id)
+          .maybeSingle();
+
+        if (!existingProgress) {
+          await supabase
+            .from('user_level_progress')
+            .insert({
+              user_id: user.id,
+              level_id: nextLevel.id,
+              status: 'current',
+              score: 0,
+              max_score: 0
+            });
+        } else if (existingProgress.status === 'locked') {
+          await supabase
+            .from('user_level_progress')
+            .update({ status: 'current' })
+            .eq('id', existingProgress.id);
+        }
+      }
     }
+
+    await Promise.all([
+      fetchUserCategoryScores(),
+      fetchUserTotalScore()
+    ]);
   };
 
-  // Save category progress (for non-level based quizzes)
-  const saveCategoryProgress = async (categoryId: string, score: number, totalQuestions: number) => {
+  // ✅ Save category progress (akumulasi skor, bukan replace)
+  const saveCategoryProgress = async (categoryId: string, score: number) => {
     if (!user) return;
 
-    // Initialize category progress if it doesn't exist
     await initializeCategoryProgress(categoryId);
 
-    // Update category score
-    const { error } = await supabase
+    const { data: oldCategoryScore } = await supabase
+      .from('user_category_scores')
+      .select('total_score, levels_completed')
+      .eq('user_id', user.id)
+      .eq('category_id', categoryId)
+      .single();
+
+    const existingCategoryScore = oldCategoryScore?.total_score || 0;
+    const existingLevelsCompleted = oldCategoryScore?.levels_completed || 0;
+    const newCategoryScore = existingCategoryScore + score;
+
+    await supabase
       .from('user_category_scores')
       .upsert({
         user_id: user.id,
         category_id: categoryId,
-        total_score: score,
-        levels_completed: 1,
+        total_score: newCategoryScore,
+        levels_completed: existingLevelsCompleted + 1,
         last_played_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,category_id'
-      });
+      }, { onConflict: 'user_id,category_id' });
 
-    // Update total user score
-    if (!error) {
-      await supabase
-        .from('user_total_scores')
-        .upsert({
-          user_id: user.id,
-          total_score: score
-        }, {
-          onConflict: 'user_id'
-        });
+    const { data: oldTotalScore } = await supabase
+      .from('user_total_scores')
+      .select('total_score')
+      .eq('user_id', user.id)
+      .single();
 
-      // Refresh data
-      await Promise.all([
-        fetchUserCategoryScores(),
-        fetchUserTotalScore()
-      ]);
-    }
+    const existingTotalScore = oldTotalScore?.total_score || 0;
+    const newTotalScore = existingTotalScore + score;
+
+    await supabase
+      .from('user_total_scores')
+      .upsert({
+        user_id: user.id,
+        total_score: newTotalScore
+      }, { onConflict: 'user_id' });
+
+    await Promise.all([
+      fetchUserCategoryScores(),
+      fetchUserTotalScore()
+    ]);
   };
 
   // Get levels for category
   const getLevelsForCategory = async (categoryId: string): Promise<QuizLevel[]> => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('quiz_levels')
       .select('*')
       .eq('category_id', categoryId)
       .order('level_number');
-    
     return (data || []) as QuizLevel[];
   };
 
   // Get user progress for levels
   const getUserLevelProgress = async (categoryId: string): Promise<UserLevelProgress[]> => {
     if (!user) return [];
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('user_level_progress')
       .select(`
         id,
@@ -255,31 +296,25 @@ export const useQuizData = () => {
       `)
       .eq('user_id', user.id)
       .eq('quiz_levels.category_id', categoryId);
-    
     return (data || []) as UserLevelProgress[];
   };
 
   // Get leaderboard
-  const getLeaderboard = async (timeframe: 'weekly' | 'monthly' = 'weekly'): Promise<LeaderboardEntry[]> => {
-    // First get user scores
-    const { data: scoreData, error: scoreError } = await supabase
+  const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+    const { data: scoreData } = await supabase
       .from('user_total_scores')
       .select('user_id, total_score, global_rank')
       .order('total_score', { ascending: false })
       .limit(50);
 
-    if (!scoreData || scoreError) return [];
+    if (!scoreData) return [];
 
-    // Then get profiles for those users
     const userIds = scoreData.map(item => item.user_id);
-    const { data: profileData, error: profileError } = await supabase
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('user_id, display_name')
       .in('user_id', userIds);
 
-    if (profileError) return [];
-
-    // Combine the data
     return scoreData.map(item => ({
       user_id: item.user_id,
       total_score: item.total_score,
@@ -301,7 +336,6 @@ export const useQuizData = () => {
       }
       setLoading(false);
     };
-
     loadData();
   }, [user]);
 

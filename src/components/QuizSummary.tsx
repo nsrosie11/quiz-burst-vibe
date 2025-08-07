@@ -1,22 +1,38 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Target, CheckCircle, XCircle, Share2, RotateCcw, Star, TrendingUp } from "lucide-react";
+import { Trophy, Target, CheckCircle, XCircle, Share2, RotateCcw, Star, TrendingUp, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuizData } from "@/hooks/useQuizData";
+import { useEffect, useState } from "react";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 
 interface QuizSummaryProps {
   score: number;
   totalQuestions: number;
+  categoryId: string;
+  currentLevelId: string;
   onPlayAgain: () => void;
   onBackToHome: () => void;
+  onNextLevel: (nextLevelId: string) => void;
 }
 
-const QuizSummary = ({ score, totalQuestions, onPlayAgain, onBackToHome }: QuizSummaryProps) => {
+const QuizSummary = ({ 
+  score, 
+  totalQuestions, 
+  categoryId, 
+  currentLevelId, 
+  onPlayAgain, 
+  onBackToHome,
+  onNextLevel
+}: QuizSummaryProps) => {
   const { toast } = useToast();
+  const { getLevelsForCategory, getUserLevelProgress } = useQuizData();
+  const [nextLevelId, setNextLevelId] = useState<string | null>(null);
+
   const percentage = Math.round((score / totalQuestions) * 100);
-  const pointsEarned = score * 50; // 50 points per correct answer
+  const pointsEarned = score * 50;
 
   const getPerformanceLevel = () => {
     if (percentage >= 90) return { level: "Excellent!", color: "text-green-600", emoji: "🏆" };
@@ -43,6 +59,27 @@ const QuizSummary = ({ score, totalQuestions, onPlayAgain, onBackToHome }: QuizS
       description: `I scored ${score}/${totalQuestions} (${percentage}%) on Quiz Burst! 🎯`,
     });
   };
+
+  // ✅ cek apakah ada next level yang sudah ke-unlock
+  useEffect(() => {
+    const fetchNextLevel = async () => {
+      const levels = await getLevelsForCategory(categoryId);
+      const progress = await getUserLevelProgress(categoryId);
+
+      const currentLevel = levels.find(l => l.id === currentLevelId);
+      if (!currentLevel) return;
+
+      const next = levels.find(l => l.level_number === currentLevel.level_number + 1);
+      if (next) {
+        const nextProgress = progress.find(p => p.level_id === next.id);
+        if (nextProgress?.status === "current") {
+          setNextLevelId(next.id);
+        }
+      }
+    };
+
+    fetchNextLevel();
+  }, [categoryId, currentLevelId]);
 
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
@@ -143,15 +180,27 @@ const QuizSummary = ({ score, totalQuestions, onPlayAgain, onBackToHome }: QuizS
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <Button 
-          variant="mejakia" 
-          size="lg" 
-          className="w-full"
-          onClick={onPlayAgain}
-        >
-          <RotateCcw className="w-5 h-5" />
-          Play Again
-        </Button>
+        {nextLevelId ? (
+          <Button 
+            variant="mejakia" 
+            size="lg" 
+            className="w-full"
+            onClick={() => onNextLevel(nextLevelId)}
+          >
+            <ArrowRight className="w-5 h-5" />
+            Next Level
+          </Button>
+        ) : (
+          <Button 
+            variant="mejakia" 
+            size="lg" 
+            className="w-full"
+            onClick={onPlayAgain}
+          >
+            <RotateCcw className="w-5 h-5" />
+            Play Again
+          </Button>
+        )}
         
         <div className="grid grid-cols-2 gap-3">
           <Button 
