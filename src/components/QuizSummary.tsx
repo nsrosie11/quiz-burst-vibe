@@ -43,14 +43,32 @@ const QuizSummary = ({
 
   const performance = getPerformanceLevel();
 
-  const otherPlayers = [
-    { name: "Sarah Quiz", score: 4, avatar: avatar2 },
-    { name: "Mike Brain", score: 3, avatar: avatar1 },
-    { name: "Emma Smart", score: 3, avatar: avatar2 },
-    { name: "You", score: score, avatar: avatar1, isCurrentUser: true },
-    { name: "John Quick", score: 2, avatar: avatar2 },
-  ].sort((a, b) => b.score - a.score);
+  // Generate dynamic ranking with random scores
+  const generateDynamicRanking = () => {
+    const playerNames = ["Alex Chen", "Sarah Quinn", "Mike Johnson", "Emma Wilson", "David Brown", "Lisa Park", "Tom Anderson"];
+    const randomPlayers = playerNames
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4)
+      .map(name => ({
+        name,
+        score: Math.floor(Math.random() * 5) + 1, // Random score 1-5
+        avatar: Math.random() > 0.5 ? avatar1 : avatar2,
+        isCurrentUser: false
+      }));
 
+    // Add current user
+    randomPlayers.push({
+      name: "You",
+      score: score,
+      avatar: avatar1,
+      isCurrentUser: true
+    });
+
+    // Sort by score descending
+    return randomPlayers.sort((a, b) => b.score - a.score);
+  };
+
+  const otherPlayers = generateDynamicRanking();
   const userRank = otherPlayers.findIndex(player => player.isCurrentUser) + 1;
 
   const handleShare = () => {
@@ -60,21 +78,19 @@ const QuizSummary = ({
     });
   };
 
-  // ✅ cek apakah ada next level yang sudah ke-unlock
+  // Check if there's a next level available
   useEffect(() => {
     const fetchNextLevel = async () => {
+      if (!currentLevelId) return; // Only for level-based quizzes
+      
       const levels = await getLevelsForCategory(categoryId);
-      const progress = await getUserLevelProgress(categoryId);
-
       const currentLevel = levels.find(l => l.id === currentLevelId);
       if (!currentLevel) return;
 
-      const next = levels.find(l => l.level_number === currentLevel.level_number + 1);
-      if (next) {
-        const nextProgress = progress.find(p => p.level_id === next.id);
-        if (nextProgress?.status === "current") {
-          setNextLevelId(next.id);
-        }
+      // Find next level by level number
+      const nextLevel = levels.find(l => l.level_number === currentLevel.level_number + 1);
+      if (nextLevel) {
+        setNextLevelId(nextLevel.id);
       }
     };
 
@@ -180,7 +196,7 @@ const QuizSummary = ({
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        {nextLevelId ? (
+        {nextLevelId && currentLevelId ? (
           <Button 
             variant="mejakia" 
             size="lg" 
@@ -188,7 +204,7 @@ const QuizSummary = ({
             onClick={() => onNextLevel(nextLevelId)}
           >
             <ArrowRight className="w-5 h-5" />
-            Next Level
+            ⏭️ Next Level
           </Button>
         ) : (
           <Button 
@@ -198,7 +214,7 @@ const QuizSummary = ({
             onClick={onPlayAgain}
           >
             <RotateCcw className="w-5 h-5" />
-            Play Again
+            🔁 Play Again
           </Button>
         )}
         
