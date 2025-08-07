@@ -34,22 +34,54 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
 
   // Get questions based on level or category
   const getQuestions = (): Question[] => {
-    if (levelId) {
-      // Level-specific questions (5 questions per level)
-      const levelNumber = parseInt(levelId.split('-')[1]) || 1;
-      return getQuestionsByLevel(categoryId, levelNumber) as Question[];
-    } else {
-      // Category-wide questions (random 5 from all levels)
-      const allQuestions = getQuestionsByCategory(categoryId) as Question[];
-      // Shuffle and take 5 random questions
-      return allQuestions.sort(() => Math.random() - 0.5).slice(0, 5);
+    console.log('getQuestions called with:', { categoryId, levelId });
+    
+    try {
+      if (levelId) {
+        // Level-specific questions (5 questions per level)
+        const levelNumber = parseInt(levelId.split('-')[1]) || 1;
+        console.log('Getting questions for level:', levelNumber);
+        const levelQuestions = getQuestionsByLevel(categoryId, levelNumber) as Question[];
+        console.log('Level questions:', levelQuestions);
+        if (levelQuestions && levelQuestions.length > 0) {
+          return levelQuestions;
+        }
+        // Fallback to category questions
+        const categoryFallback = getQuestionsByCategory(categoryId).slice(0, 5);
+        console.log('Using category fallback:', categoryFallback);
+        return categoryFallback;
+      } else {
+        // Category-wide questions (random 5 from all levels)
+        const allQuestions = getQuestionsByCategory(categoryId) as Question[];
+        console.log('Category questions:', allQuestions);
+        if (allQuestions && allQuestions.length > 0) {
+          // Shuffle and take 5 random questions
+          const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 5);
+          return shuffled;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting questions:', error);
     }
+    
+    // Ultimate fallback
+    console.log('Using ultimate fallback questions');
+    return [
+      {
+        id: 1,
+        question: "What is 2 + 2?",
+        options: ["3", "4", "5", "6"],
+        correctAnswer: 1
+      }
+    ];
   };
 
   const questions = getQuestions();
+  console.log('Final questions array:', questions, 'length:', questions.length);
 
   const currentQ = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  console.log('Current question:', currentQ, 'currentQuestion index:', currentQuestion);
+  const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
 
   useEffect(() => {
     if (timeLeft > 0 && !showFeedback) {
@@ -61,7 +93,7 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
   }, [timeLeft, showFeedback]);
 
   const handleAnswer = (answerIndex: number) => {
-    if (showFeedback) return;
+    if (showFeedback || !currentQ) return;
     
     setSelectedAnswer(answerIndex);
     setShowFeedback(true);
@@ -96,7 +128,7 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
   };
 
   const getOptionStyle = (index: number) => {
-    if (!showFeedback) {
+    if (!currentQ || !showFeedback) {
       return selectedAnswer === index 
         ? "bg-primary text-primary-foreground" 
         : "bg-card hover:bg-muted";
@@ -109,6 +141,21 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
     }
     return "bg-muted";
   };
+
+  // Safety check to prevent crash if no questions loaded
+  if (!questions || questions.length === 0 || !currentQ) {
+    return (
+      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+        <Card className="p-6 bg-card text-center">
+          <h2 className="text-xl font-bold text-foreground mb-4">Loading Questions...</h2>
+          <p className="text-muted-foreground">Please wait while we load the quiz questions.</p>
+          <div className="mt-4">
+            <Button onClick={onBack} variant="outline">Go Back</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 space-y-6">
