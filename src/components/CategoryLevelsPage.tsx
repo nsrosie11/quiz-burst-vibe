@@ -41,12 +41,12 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
         const progress = userProgress.find(p => p.level_id === level.id);
         let status: 'available' | 'current' | 'completed' = 'available';
         
-        if (progress?.status === 'completed') {
-          status = 'completed';
-        } else if (progress?.status === 'current') {
-          status = 'current';
-        } else {
-          status = 'available'; // All levels are available by default
+        if (progress) {
+          if (progress.status === 'completed' && progress.score > 0) {
+            status = 'completed';
+          } else {
+            status = 'current';
+          }
         }
         
         return {
@@ -77,7 +77,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       case 'current':
         return <Play className="w-6 h-6 text-white" />;
       case 'available':
-        return <Play className="w-6 h-6 text-white" />;
+        return <Play className="w-6 h-6 text-white" />; // All levels available
     }
   };
 
@@ -88,7 +88,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       case 'current':
         return "bg-mejakia-primary hover:bg-mejakia-primary/90 text-white shadow-glow";
       case 'available':
-        return "bg-primary hover:bg-primary/90 text-white shadow-quiz";
+        return "bg-primary hover:bg-primary/90 text-white shadow-quiz"; // All levels clickable
     }
   };
 
@@ -180,7 +180,9 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
           </div>
           <div>
             <h3 className="font-bold text-lg text-foreground">Next Reward</h3>
-            <p className="text-sm text-muted-foreground">Complete 2 more levels to unlock Math Champion badge!</p>
+            <p className="text-sm text-muted-foreground">
+              Complete {Math.max(0, 6 - completedLevels)} more levels to unlock {category.name} Champion badge!
+            </p>
           </div>
         </div>
       </Card>

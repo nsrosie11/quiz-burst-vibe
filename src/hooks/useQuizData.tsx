@@ -108,7 +108,7 @@ export const useQuizData = () => {
 
   // Generate daily recommendation
   const generateDailyRecommendation = async () => {
-    if (!user) return;
+    if (!user || categories.length === 0) return;
 
     const unplayedCategories = categories.filter(cat =>
       !userCategoryScores.find(score => score.category_id === cat.id)
@@ -120,12 +120,15 @@ export const useQuizData = () => {
     if (unplayedCategories.length > 0) {
       recommendedCategory = unplayedCategories[Math.floor(Math.random() * unplayedCategories.length)];
       reason = "Try something new today!";
-    } else {
+    } else if (userCategoryScores.length > 0) {
       const categoryWithLowestProgress = userCategoryScores.reduce((min, score) =>
         score.levels_completed < min.levels_completed ? score : min
       );
       recommendedCategory = categories.find(cat => cat.id === categoryWithLowestProgress.category_id);
       reason = "Continue your progress!";
+    } else {
+      recommendedCategory = categories[0];
+      reason = "Start your quiz journey!";
     }
 
     if (recommendedCategory) {
@@ -300,6 +303,32 @@ export const useQuizData = () => {
   };
 
   // Get leaderboard
+  // Get questions from database
+  const getQuizQuestions = async (categoryId: string, levelId?: string): Promise<any[]> => {
+    try {
+      const { data } = await supabase
+        .from('quiz_questions')
+        .select('*')
+        .eq('category_id', categoryId)
+        .eq('level_id', levelId || '')
+        .limit(5);
+      
+      if (data && data.length > 0) {
+        return data.map(q => ({
+          id: q.id,
+          question: q.question_text,
+          options: [q.option_a, q.option_b, q.option_c, q.option_d],
+          correctAnswer: q.correct_answer
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching questions from database:', error);
+    }
+    
+    // Fallback to mock questions if database is empty
+    return [];
+  };
+
   const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
     const { data: scoreData } = await supabase
       .from('user_total_scores')
@@ -352,6 +381,7 @@ export const useQuizData = () => {
     getLevelsForCategory,
     getUserLevelProgress,
     getLeaderboard,
+    getQuizQuestions,
     fetchUserCategoryScores,
     fetchUserTotalScore
   };

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Target, CheckCircle, XCircle, Share2, RotateCcw, Star, TrendingUp, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuizData } from "@/hooks/useQuizData";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
@@ -28,8 +29,10 @@ const QuizSummary = ({
   onNextLevel
 }: QuizSummaryProps) => {
   const { toast } = useToast();
-  const { getLevelsForCategory, getUserLevelProgress } = useQuizData();
+  const { getLevelsForCategory, getUserLevelProgress, getLeaderboard } = useQuizData();
+  const { user } = useAuth();
   const [nextLevelId, setNextLevelId] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   const percentage = Math.round((score / totalQuestions) * 100);
   const pointsEarned = score * 50;
@@ -43,9 +46,49 @@ const QuizSummary = ({
 
   const performance = getPerformanceLevel();
 
-  // Generate dynamic ranking with random scores
+  // Load real leaderboard data
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const data = await getLeaderboard();
+        if (data && data.length > 0) {
+          setLeaderboard(data.slice(0, 5)); // Top 5 players
+        }
+      } catch (error) {
+        console.error('Error loading leaderboard:', error);
+      }
+    };
+
+    loadLeaderboard();
+  }, [getLeaderboard]);
+
+  // Generate dynamic ranking with real names and fallback
   const generateDynamicRanking = () => {
-    const playerNames = ["Alex Chen", "Sarah Quinn", "Mike Johnson", "Emma Wilson", "David Brown", "Lisa Park", "Tom Anderson"];
+    if (leaderboard.length > 0) {
+      // Use real leaderboard data
+      const ranking = leaderboard.map((player, index) => ({
+        name: player.display_name || 'Unknown Player',
+        score: player.total_score,
+        rank: player.global_rank || index + 1,
+        isCurrentUser: user && player.user_id === user.id
+      }));
+
+      // If current user is not in top 5, add them
+      const currentUserInTop5 = ranking.find(r => r.isCurrentUser);
+      if (!currentUserInTop5 && user) {
+        ranking.push({
+          name: "You",
+          score: score,
+          rank: ranking.length + 1,
+          isCurrentUser: true
+        });
+      }
+
+      return ranking.slice(0, 6); // Max 6 players
+    }
+
+    // Fallback to mock data
+    const playerNames = ["Alex Chen", "Sarah Quinn", "Mike Johnson", "Emma Wilson", "David Brown"];
     const randomPlayers = playerNames
       .sort(() => Math.random() - 0.5)
       .slice(0, 4)
