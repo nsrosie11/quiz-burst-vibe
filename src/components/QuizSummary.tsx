@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Target, CheckCircle, XCircle, Share2, RotateCcw, Star, TrendingUp, ArrowRight } from "lucide-react";
+import { Trophy, Share2, RotateCcw, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuizData } from "@/hooks/useQuizData";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,13 @@ interface QuizSummaryProps {
   onNextLevel: (nextLevelId: string) => void;
 }
 
+interface RankingPlayer {
+  name: string;
+  score: number;
+  avatar: string;
+  isCurrentUser: boolean;
+}
+
 const QuizSummary = ({ 
   score, 
   totalQuestions, 
@@ -29,13 +36,58 @@ const QuizSummary = ({
   onNextLevel
 }: QuizSummaryProps) => {
   const { toast } = useToast();
-  const { getLevelsForCategory, getUserLevelProgress, getLeaderboard } = useQuizData();
+  const { getLevelsForCategory, getLeaderboard } = useQuizData();
   const { user } = useAuth();
+
   const [nextLevelId, setNextLevelId] = useState<string | null>(null);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [rankings, setRankings] = useState<RankingPlayer[]>([]);
+  const [playerPosition, setPlayerPosition] = useState<string>("");
 
   const percentage = Math.round((score / totalQuestions) * 100);
   const pointsEarned = score * 50;
+
+  const getOrdinalSuffix = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return s[(v - 20) % 10] || s[v] || s[0];
+  };
+
+  useEffect(() => {
+    const loadRankings = async () => {
+      const leaderboardData = await getLeaderboard();
+      
+      const transformedRankings: RankingPlayer[] = leaderboardData.map(entry => ({
+        name: entry.display_name || "Anonymous Player",
+        score: entry.total_score,
+        avatar: Math.random() > 0.5 ? avatar1 : avatar2,
+        isCurrentUser: entry.user_id === user?.id
+      }));
+
+      setRankings(transformedRankings);
+
+      const position = leaderboardData.findIndex(entry => entry.user_id === user?.id) + 1;
+      const totalPlayers = leaderboardData.length;
+      if (position > 0) {
+        setPlayerPosition(`You placed ${position}${getOrdinalSuffix(position)} out of ${totalPlayers} players`);
+      }
+    };
+
+    const fetchNextLevel = async () => {
+      if (!currentLevelId) return;
+      
+      const levels = await getLevelsForCategory(categoryId);
+      const currentLevel = levels.find(l => l.id === currentLevelId);
+      if (!currentLevel) return;
+
+      const nextLevel = levels.find(l => l.level_number === currentLevel.level_number + 1);
+      if (nextLevel) {
+        setNextLevelId(nextLevel.id);
+      }
+    };
+
+    loadRankings();
+    fetchNextLevel();
+  }, [categoryId, currentLevelId, user?.id]);
 
   const getPerformanceLevel = () => {
     if (percentage >= 90) return { level: "Excellent!", color: "text-green-600", emoji: "🏆" };
@@ -46,74 +98,6 @@ const QuizSummary = ({
 
   const performance = getPerformanceLevel();
 
-  // Load real leaderboard data
-  useEffect(() => {
-    const loadLeaderboard = async () => {
-      try {
-        const data = await getLeaderboard();
-        if (data && data.length > 0) {
-          setLeaderboard(data.slice(0, 5)); // Top 5 players
-        }
-      } catch (error) {
-        console.error('Error loading leaderboard:', error);
-      }
-    };
-
-    loadLeaderboard();
-  }, [getLeaderboard]);
-
-  // Generate dynamic ranking with real names and fallback
-  const generateDynamicRanking = () => {
-    if (leaderboard.length > 0) {
-      // Use real leaderboard data
-      const ranking = leaderboard.map((player, index) => ({
-        name: player.display_name || 'Unknown Player',
-        score: player.total_score,
-        rank: player.global_rank || index + 1,
-        isCurrentUser: user && player.user_id === user.id
-      }));
-
-      // If current user is not in top 5, add them
-      const currentUserInTop5 = ranking.find(r => r.isCurrentUser);
-      if (!currentUserInTop5 && user) {
-        ranking.push({
-          name: "You",
-          score: score,
-          rank: ranking.length + 1,
-          isCurrentUser: true
-        });
-      }
-
-      return ranking.slice(0, 6); // Max 6 players
-    }
-
-    // Fallback to mock data
-    const playerNames = ["Alex Chen", "Sarah Quinn", "Mike Johnson", "Emma Wilson", "David Brown"];
-    const randomPlayers = playerNames
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 4)
-      .map(name => ({
-        name,
-        score: Math.floor(Math.random() * 5) + 1, // Random score 1-5
-        avatar: Math.random() > 0.5 ? avatar1 : avatar2,
-        isCurrentUser: false
-      }));
-
-    // Add current user
-    randomPlayers.push({
-      name: "You",
-      score: score,
-      avatar: avatar1,
-      isCurrentUser: true
-    });
-
-    // Sort by score descending
-    return randomPlayers.sort((a, b) => b.score - a.score);
-  };
-
-  const otherPlayers = generateDynamicRanking();
-  const userRank = otherPlayers.findIndex(player => player.isCurrentUser) + 1;
-
   const handleShare = () => {
     toast({
       title: "Share your score!",
@@ -121,164 +105,64 @@ const QuizSummary = ({
     });
   };
 
-  // Check if there's a next level available
-  useEffect(() => {
-    const fetchNextLevel = async () => {
-      if (!currentLevelId) return; // Only for level-based quizzes
-      
-      const levels = await getLevelsForCategory(categoryId);
-      const currentLevel = levels.find(l => l.id === currentLevelId);
-      if (!currentLevel) return;
-
-      // Find next level by level number
-      const nextLevel = levels.find(l => l.level_number === currentLevel.level_number + 1);
-      if (nextLevel) {
-        setNextLevelId(nextLevel.id);
-      }
-    };
-
-    fetchNextLevel();
-  }, [categoryId, currentLevelId]);
-
   return (
-    <div className="min-h-screen bg-background p-4 space-y-6">
-      {/* Header */}
-      <div className="text-center pt-8">
-        <h1 className="text-3xl font-fredoka font-semibold text-foreground mb-2">Quiz Complete!</h1>
-        <p className="text-lg font-nunito text-muted-foreground">Here's how you did</p>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-2">{performance.emoji} {performance.level}</h1>
+        <p className="text-xl mb-4">You scored <span className={performance.color}>{score}/{totalQuestions}</span></p>
+        {playerPosition && <p className="text-lg text-muted-foreground">{playerPosition}</p>}
       </div>
 
-      {/* Main Score Card */}
-      <Card className="p-8 bg-mejakia-gradient text-white text-center">
-        <div className="space-y-4">
-          <div className="text-6xl">{performance.emoji}</div>
-          <h2 className="text-2xl font-fredoka font-semibold">{performance.level}</h2>
-          <div className="text-5xl font-nunito font-bold">{score}/{totalQuestions}</div>
-          <p className="text-xl font-nunito opacity-90">{percentage}% Correct</p>
-          <Badge className="bg-white text-mejakia-primary text-lg px-4 py-2 font-nunito font-bold">
-            +{pointsEarned} Points
-          </Badge>
-        </div>
-      </Card>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="p-4 bg-card shadow-quiz border-0 text-center">
-          <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{score}</p>
-          <p className="text-sm text-muted-foreground">Correct</p>
-        </Card>
-        
-        <Card className="p-4 bg-card shadow-quiz border-0 text-center">
-          <XCircle className="w-8 h-8 text-red-500 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{totalQuestions - score}</p>
-          <p className="text-sm text-muted-foreground">Wrong</p>
-        </Card>
-        
-        <Card className="p-4 bg-card shadow-quiz border-0 text-center">
-          <Target className="w-8 h-8 text-quiz-purple mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{percentage}%</p>
-          <p className="text-sm text-muted-foreground">Accuracy</p>
-        </Card>
-      </div>
-
-      {/* Ranking Card */}
-      <Card className="p-6 bg-card shadow-quiz border-0">
-        <div className="flex items-center gap-3 mb-4">
-          <TrendingUp className="w-6 h-6 text-quiz-purple" />
-          <h3 className="text-xl font-bold text-foreground">Your Ranking</h3>
-        </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-quiz-purple rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">#{userRank}</span>
-            </div>
-            <div>
-              <p className="font-bold text-foreground">You placed {userRank}{userRank === 1 ? 'st' : userRank === 2 ? 'nd' : userRank === 3 ? 'rd' : 'th'}</p>
-              <p className="text-sm text-muted-foreground">Out of {otherPlayers.length} players</p>
-            </div>
+      <Card className="p-6 mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold mb-2">Performance Summary</h2>
+            <p className="text-muted-foreground">Points earned: {pointsEarned}</p>
           </div>
-          {userRank <= 3 && (
-            <Trophy className={`w-8 h-8 ${
-              userRank === 1 ? "text-yellow-500" : 
-              userRank === 2 ? "text-gray-400" : "text-amber-600"
-            }`} />
-          )}
+          <div className="text-right">
+            <div className="text-3xl font-bold mb-1">{percentage}%</div>
+            <Badge variant="outline" className="text-xs">{performance.level}</Badge>
+          </div>
         </div>
 
-        {/* Mini leaderboard */}
-        <div className="space-y-2">
-          <p className="text-sm font-semibold text-muted-foreground mb-3">This Round Results:</p>
-          {otherPlayers.slice(0, 5).map((player, index) => (
-            <div 
-              key={player.name}
-              className={`flex items-center gap-3 p-2 rounded-lg ${
-                player.isCurrentUser ? "bg-quiz-purple/10 border-2 border-quiz-purple" : ""
-              }`}
-            >
-              <span className="w-6 text-center font-bold text-sm text-muted-foreground">
-                #{index + 1}
-              </span>
-              <img 
-                src={player.avatar} 
-                alt={player.name}
-                className="w-8 h-8 rounded-full"
-              />
-              <span className={`flex-1 ${player.isCurrentUser ? "font-bold text-quiz-purple" : "text-foreground"}`}>
-                {player.name}
-              </span>
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 text-quiz-yellow" />
-                <span className="font-bold text-foreground">{player.score}</span>
+        <div className="space-y-4">
+          {rankings.map((player, index) => (
+            <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${player.isCurrentUser ? 'bg-primary/10' : 'bg-secondary/10'}`}>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img src={player.avatar} alt="" className="w-10 h-10 rounded-full" />
+                  {index < 3 && <Trophy className="w-4 h-4 text-yellow-500 absolute -top-1 -right-1" />}
+                </div>
+                <div>
+                  <p className="font-semibold">{player.name}</p>
+                  <p className="text-sm text-muted-foreground">#{index + 1}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">{player.score}</p>
+                <p className="text-sm text-muted-foreground">points</p>
               </div>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        {nextLevelId && currentLevelId ? (
-          <Button 
-            variant="mejakia" 
-            size="lg" 
-            className="w-full"
-            onClick={() => onNextLevel(nextLevelId)}
-          >
-            <ArrowRight className="w-5 h-5" />
-            ⏭️ Next Level
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button variant="outline" onClick={onPlayAgain} className="flex-1">
+          <RotateCcw className="w-4 h-4 mr-2" /> Play Again
+        </Button>
+        <Button variant="outline" onClick={handleShare} className="flex-1">
+          <Share2 className="w-4 h-4 mr-2" /> Share Score
+        </Button>
+        {nextLevelId ? (
+          <Button onClick={() => onNextLevel(nextLevelId)} className="flex-1">
+            Next Level <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         ) : (
-          <Button 
-            variant="mejakia" 
-            size="lg" 
-            className="w-full"
-            onClick={onPlayAgain}
-          >
-            <RotateCcw className="w-5 h-5" />
-            🔁 Play Again
+          <Button onClick={onBackToHome} className="flex-1">
+            Back to Home
           </Button>
         )}
-        
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={handleShare}
-          >
-            <Share2 className="w-5 h-5" />
-            Share Score
-          </Button>
-          
-          <Button 
-            variant="secondary" 
-            size="lg"
-            onClick={onBackToHome}
-          >
-            Home
-          </Button>
-        </div>
       </div>
     </div>
   );

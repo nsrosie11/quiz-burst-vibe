@@ -24,55 +24,63 @@ interface QuizInterfaceProps {
 
 const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId }: QuizInterfaceProps) => {
   const { user } = useAuth();
-  const { saveCategoryProgress, getQuizQuestions, completeLevel } = useQuizData();
+  const { saveCategoryProgress } = useQuizData();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [isSaving, setIsSaving] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [questionsLoading, setQuestionsLoading] = useState(true);
 
-  // Load questions from database on component mount
-  useEffect(() => {
-    const loadQuestions = async () => {
-      setQuestionsLoading(true);
-      try {
-        const dbQuestions = await getQuizQuestions(categoryId, levelId);
-        if (dbQuestions && dbQuestions.length > 0) {
-          setQuestions(dbQuestions);
-        } else {
-          // Fallback to hardcoded questions
-          const fallbackQuestions = getQuestionsByLevel(categoryId, levelId ? parseInt(levelId.split('-')[1]) || 1 : 1) as Question[];
-          if (fallbackQuestions && fallbackQuestions.length > 0) {
-            setQuestions(fallbackQuestions);
-          } else {
-            // Ultimate fallback
-            setQuestions([{
-              id: 1,
-              question: "What is 2 + 2?",
-              options: ["3", "4", "5", "6"],
-              correctAnswer: 1
-            }]);
-          }
+  // Get questions based on level or category
+  const getQuestions = (): Question[] => {
+    console.log('getQuestions called with:', { categoryId, levelId });
+    
+    try {
+      if (levelId) {
+        // Level-specific questions (5 questions per level)
+        const levelNumber = parseInt(levelId.split('-')[1]) || 1;
+        console.log('Getting questions for level:', levelNumber);
+        const levelQuestions = getQuestionsByLevel(categoryId, levelNumber) as Question[];
+        console.log('Level questions:', levelQuestions);
+        if (levelQuestions && levelQuestions.length > 0) {
+          return levelQuestions;
         }
-      } catch (error) {
-        console.error('Error loading questions:', error);
-        setQuestions([{
-          id: 1,
-          question: "What is 2 + 2?",
-          options: ["3", "4", "5", "6"],
-          correctAnswer: 1
-        }]);
+        // Fallback to category questions
+        const categoryFallback = getQuestionsByCategory(categoryId).slice(0, 5);
+        console.log('Using category fallback:', categoryFallback);
+        return categoryFallback;
+      } else {
+        // Category-wide questions (random 5 from all levels)
+        const allQuestions = getQuestionsByCategory(categoryId) as Question[];
+        console.log('Category questions:', allQuestions);
+        if (allQuestions && allQuestions.length > 0) {
+          // Shuffle and take 5 random questions
+          const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 5);
+          return shuffled;
+        }
       }
-      setQuestionsLoading(false);
-    };
+    } catch (error) {
+      console.error('Error getting questions:', error);
+    }
+    
+    // Ultimate fallback
+    console.log('Using ultimate fallback questions');
+    return [
+      {
+        id: 1,
+        question: "What is 2 + 2?",
+        options: ["3", "4", "5", "6"],
+        correctAnswer: 1
+      }
+    ];
+  };
 
-    loadQuestions();
-  }, [categoryId, levelId, getQuizQuestions]);
+  const questions = getQuestions();
+  console.log('Final questions array:', questions, 'length:', questions.length);
 
   const currentQ = questions[currentQuestion];
+  console.log('Current question:', currentQ, 'currentQuestion index:', currentQuestion);
   const progress = questions.length > 0 ? ((currentQuestion + 1) / questions.length) * 100 : 0;
 
   useEffect(() => {
@@ -103,23 +111,40 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
       setTimeLeft(30);
     } else {
       // Quiz completed - save progress to database
-      if (user) {
-        setIsSaving(true);
+      // Update the handleQuizComplete function
+      const handleQuizComplete = async () => {
+        if (isSaving) return;
+        
         try {
-          if (levelId) {
-            // Level-specific completion
-            await completeLevel(levelId, score);
-          } else {
-            // Category-wide completion
-            await saveCategoryProgress(categoryId, score);
+          setIsSaving(true);
+          const totalQuestions = questions.length;
+          const correctAnswers = score;
+          const points = correctAnswers; // 1 point per correct answer
+          
+          if (levelId && categoryId) {
+            await saveCategoryProgress({
+              categoryId,
+              levelId,
+              score: points,
+              maxScore: totalQuestions,
+              correctAnswers,
+              totalQuestions
+            });
           }
-          toast.success(`Quiz selesai! Skor Anda: ${score}/${questions.length}`);
+          
+          onQuizComplete(correctAnswers, totalQuestions);
         } catch (error) {
-          toast.error("Gagal menyimpan progress");
-          console.error("Error saving progress:", error);
+          console.error('Error saving quiz progress:', error);
+          toast.error('Failed to save quiz progress');
         } finally {
           setIsSaving(false);
         }
+      };
+      
+      // Call handleQuizComplete when quiz is finished
+      if (user) {
+        await handleQuizComplete();
+        toast.success(`Quiz completed! Score: ${score}/${questions.length}`);
       }
       onQuizComplete(score, questions.length);
     }
@@ -141,16 +166,12 @@ const QuizInterface = ({ onQuizComplete, onBack, categoryId = "random", levelId 
   };
 
   // Safety check to prevent crash if no questions loaded
-  if (questionsLoading || !questions || questions.length === 0 || !currentQ) {
+  if (!questions || questions.length === 0 || !currentQ) {
     return (
       <div className="min-h-screen bg-background p-4 flex items-center justify-center">
         <Card className="p-6 bg-card text-center">
-          <h2 className="text-xl font-bold text-foreground mb-4">
-            {questionsLoading ? "Loading Questions..." : "No Questions Available"}
-          </h2>
-          <p className="text-muted-foreground">
-            {questionsLoading ? "Please wait while we load the quiz questions." : "Sorry, no questions found for this category/level."}
-          </p>
+          <h2 className="text-xl font-bold text-foreground mb-4">Loading Questions...</h2>
+          <p className="text-muted-foreground">Please wait while we load the quiz questions.</p>
           <div className="mt-4">
             <Button onClick={onBack} variant="outline">Go Back</Button>
           </div>

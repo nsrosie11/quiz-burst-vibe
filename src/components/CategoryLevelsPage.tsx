@@ -2,93 +2,112 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Star, Trophy, Lock, Play, CheckCircle } from "lucide-react";
-import { useQuizData, QuizLevel, UserLevelProgress } from "@/hooks/useQuizData";
+import { ArrowLeft, Star, Trophy, Play, CheckCircle } from "lucide-react";
+import { useQuizData } from "@/hooks/useQuizData";
 
+// Tipe data Level
 interface Level {
   id: string;
   name: string;
-  status: 'available' | 'current' | 'completed';
+  status: "available" | "current" | "completed";
   points: number;
-  maxPoints: number;
+  correct_answers: number;
+  total_questions: number;
   level_number: number;
 }
 
 interface CategoryLevelsPageProps {
-  category: {
-    id: string;
-    name: string;
-    icon: string;
-  };
+  category: { id: string; name: string; icon: string };
   onBack: () => void;
   onStartLevel: (categoryId: string, levelId: string) => void;
 }
 
-const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPageProps) => {
+const CategoryLevelsPage = ({
+  category,
+  onBack,
+  onStartLevel,
+}: CategoryLevelsPageProps) => {
   const { getLevelsForCategory, getUserLevelProgress } = useQuizData();
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadLevels = async () => {
-      setLoading(true);
-      const [quizLevels, userProgress] = await Promise.all([
-        getLevelsForCategory(category.id),
-        getUserLevelProgress(category.id)
-      ]);
+      try {
+        setLoading(true);
+        const [quizLevels, userProgress] = await Promise.all([
+          getLevelsForCategory(category.id),
+          getUserLevelProgress(category.id),
+        ]);
 
-      const levelsWithProgress = quizLevels.map(level => {
-        const progress = userProgress.find(p => p.level_id === level.id);
-        let status: 'available' | 'current' | 'completed' = 'available';
-        
-        if (progress) {
-          if (progress.status === 'completed' && progress.score > 0) {
-            status = 'completed';
-          } else {
-            status = 'current';
+        console.log("📌 quizLevels:", quizLevels);
+        console.log("📌 userProgress:", userProgress);
+
+        const levelsWithProgress: Level[] = quizLevels.map((level: any) => {
+          const progress = userProgress.find(
+            (p: any) => p.level_id === level.id
+          );
+
+          let status: Level["status"] = "available";
+          if (progress) {
+            if (
+              progress.correct_answers >=
+              (progress.total_questions || level.questions_count)
+            ) {
+              status = "completed";
+            } else {
+              status = "current";
+            }
           }
-        }
-        
-        return {
-          id: level.id,
-          name: level.name,
-          status,
-          points: progress?.score || 0,
-          maxPoints: level.max_points,
-          level_number: level.level_number
-        };
-      });
 
-      setLevels(levelsWithProgress);
-      setLoading(false);
+          return {
+            id: level.id,
+            name: level.name,
+            status,
+            points: progress?.correct_answers ?? 0,
+            correct_answers: progress?.correct_answers ?? 0,
+            total_questions:
+              progress?.total_questions ?? level.questions_count ?? 0,
+            level_number: level.level_number,
+          };
+        });
+
+        setLevels(levelsWithProgress);
+      } catch (error) {
+        console.error("Failed to load levels:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadLevels();
   }, [category.id, getLevelsForCategory, getUserLevelProgress]);
 
   const totalScore = levels.reduce((sum, level) => sum + level.points, 0);
-  const completedLevels = levels.filter(level => level.status === 'completed').length;
-  const progressPercentage = (completedLevels / levels.length) * 100;
+  const completedLevels = levels.filter(
+    (level) => level.status === "completed"
+  ).length;
+  const progressPercentage =
+    levels.length > 0 ? (completedLevels / levels.length) * 100 : 0;
 
-  const getStatusIcon = (status: Level['status']) => {
+  const getStatusIcon = (status: Level["status"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="w-6 h-6 text-green-500" />;
-      case 'current':
+      case "current":
+      case "available":
         return <Play className="w-6 h-6 text-white" />;
-      case 'available':
-        return <Play className="w-6 h-6 text-white" />; // All levels available
     }
   };
 
-  const getLevelCardClass = (status: Level['status']) => {
+  const getLevelCardClass = (status: Level["status"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return "bg-green-500 hover:bg-green-600 text-white shadow-quiz";
-      case 'current':
+      case "current":
         return "bg-mejakia-primary hover:bg-mejakia-primary/90 text-white shadow-glow";
-      case 'available':
-        return "bg-primary hover:bg-primary/90 text-white shadow-quiz"; // All levels clickable
+      case "available":
+        return "bg-primary hover:bg-primary/90 text-white shadow-quiz";
     }
   };
 
@@ -96,9 +115,9 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
     <div className="min-h-screen bg-quiz-bg-gradient p-4 space-y-6">
       {/* Header */}
       <div className="pt-8 relative">
-        <Button 
-          variant="back" 
-          size="icon" 
+        <Button
+          variant="back"
+          size="icon"
           onClick={onBack}
           className="absolute left-0 top-8 w-10 h-10"
         >
@@ -108,7 +127,9 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
           <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2 font-fredoka">
             {category.icon} Kategori {category.name}
           </h1>
-          <p className="text-muted-foreground mt-2">Complete levels to earn points!</p>
+          <p className="text-muted-foreground mt-2">
+            Complete levels to earn points!
+          </p>
         </div>
       </div>
 
@@ -118,19 +139,25 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Score</p>
-              <p className="text-4xl font-bold text-foreground">{totalScore.toLocaleString()} pts</p>
+              <p className="text-4xl font-bold text-foreground">
+                {totalScore.toLocaleString()} pts
+              </p>
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Completed</p>
-              <p className="text-xl font-bold text-foreground">{completedLevels}/{levels.length}</p>
+              <p className="text-xl font-bold text-foreground">
+                {completedLevels}/{levels.length}
+              </p>
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="space-y-2 border-2 border-stroke rounded-xl p-3">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">Progress</p>
-              <p className="text-sm text-muted-foreground">{Math.round(progressPercentage)}%</p>
+              <p className="text-sm text-muted-foreground">
+                {Math.round(progressPercentage)}%
+              </p>
             </div>
             <Progress value={progressPercentage} className="h-3" />
           </div>
@@ -141,34 +168,50 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-foreground">Levels</h2>
         <div className="grid grid-cols-2 gap-4">
-          {levels.map((level, index) => (
-            <Card 
-              key={level.id}
-              className={`p-4 cursor-pointer transition-all border-0 ${getLevelCardClass(level.status)}`}
-              onClick={() => onStartLevel(category.id, level.id)}
-            >
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20">
-                  {getStatusIcon(level.status)}
+          {loading ? (
+            <p className="col-span-2 text-center text-muted-foreground">
+              Loading...
+            </p>
+          ) : (
+            levels.map((level) => (
+              <Card
+                key={level.id}
+                className={`p-4 cursor-pointer transition-all border-0 ${getLevelCardClass(
+                  level.status
+                )}`}
+                onClick={() => onStartLevel(category.id, level.id)}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20">
+                    {getStatusIcon(level.status)}
+                  </div>
+                  <div className="text-center">
+                    <h3 className="font-bold text-lg">{level.name}</h3>
+
+                    {level.status === "completed" && (
+                      <>
+                        <div className="flex items-center justify-center gap-1 mt-1">
+                          <Star className="w-4 h-4 text-yellow-300 fill-current" />
+                          <p className="text-sm">+{level.points} pts</p>
+                        </div>
+                        <p className="text-sm text-green-300">
+                          {level.correct_answers}/{level.total_questions} correct
+                        </p>
+                      </>
+                    )}
+
+                    {level.status === "current" && (
+                      <p className="text-sm opacity-90 mt-1">▶️ Current</p>
+                    )}
+
+                    {level.status === "available" && (
+                      <p className="text-sm opacity-90 mt-1">🔓 Available</p>
+                    )}
+                  </div>
                 </div>
-                <div className="text-center">
-                  <h3 className="font-bold text-lg">{level.name}</h3>
-                  {level.status === 'completed' && (
-                    <div className="flex items-center justify-center gap-1 mt-1">
-                      <Star className="w-4 h-4 text-yellow-300 fill-current" />
-                      <p className="text-sm">+{level.points} pts</p>
-                    </div>
-                  )}
-                  {level.status === 'current' && (
-                    <p className="text-sm opacity-90 mt-1">▶️ Current</p>
-                  )}
-                  {level.status === 'available' && (
-                    <p className="text-sm opacity-90 mt-1">🔓 Available</p>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
       </div>
 
@@ -181,7 +224,7 @@ const CategoryLevelsPage = ({ category, onBack, onStartLevel }: CategoryLevelsPa
           <div>
             <h3 className="font-bold text-lg text-foreground">Next Reward</h3>
             <p className="text-sm text-muted-foreground">
-              Complete {Math.max(0, 6 - completedLevels)} more levels to unlock {category.name} Champion badge!
+              Complete 2 more levels to unlock Math Champion badge!
             </p>
           </div>
         </div>
