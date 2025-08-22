@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Database } from "@/types/supabase";
+
 
 /* =========================
  * Types / Interfaces
@@ -26,12 +28,17 @@ export interface QuizLevel {
 export interface UserLevelProgress {
   id: string;
   level_id: string;
-  status: 'locked' | 'current' | 'completed';
-  score: number;             // points (we treat this as the level points)
-  max_score: number;         // max points possible for the attempt
-  correct_answers: number;
-  total_questions: number;
-  completed_at?: string | null;
+  status: "locked" | "current" | "completed";
+  score: number;
+  max_score: number | null; // Sesuaikan dengan skema Supabase
+  correct_answers: number | null; // Sesuaikan dengan skema Supabase
+  total_questions: number | null; // Sesuaikan dengan skema Supabase
+  completed_at: string | null; // Hapus tanda `?`
+  created_at: string; // Hapus tanda `?`
+  updated_at: string; // Hapus tanda `?`
+  // Tambahkan properti lain yang ada di tabel Supabase
+  // misalnya: user_id: string;
+  
 }
 
 export interface UserCategoryScore {
@@ -58,7 +65,7 @@ export interface LevelScore {
   level_id: string;
   level_number: number;
   name: string;
-  points: number;            // what you’ll show as level.points
+  points: number; // Ini bisa jadi `score` dari tabel Supabase
   correct_answers: number;
   total_questions: number;
   status: 'available' | 'current' | 'completed';
@@ -68,12 +75,11 @@ export interface LevelScore {
 interface SaveProgressParams {
   categoryId: string;
   levelId: string;
-  /** points yang ingin ditambahkan/ditulis untuk level tsb */
   score: number;
-  /** maksimum points (biasanya = total_questions) */
   maxScore: number;
-  correctAnswers: number;
-  totalQuestions: number;
+  // Perbaiki nama properti agar sesuai dengan skema database
+  correct_answers: number | null; 
+  total_questions: number | null;
 }
 
 /* =========================
@@ -85,6 +91,7 @@ export const useQuizData = () => {
 
   const [categories, setCategories] = useState<QuizCategory[]>([]);
   const [userCategoryScores, setUserCategoryScores] = useState<UserCategoryScore[]>([]);
+  const [userLevelProgress, setUserLevelProgress] = useState<UserLevelProgress[]>([]);
   const [userTotalScore, setUserTotalScore] = useState<number>(0);
   const [globalRank, setGlobalRank] = useState<number>(0);
   const [dailyRecommendation, setDailyRecommendation] = useState<DailyRecommendation | null>(null);
@@ -249,7 +256,7 @@ export const useQuizData = () => {
             total_questions: 0       // Add these fields
           });
         }
-        if (existingProgress.status === 'locked') {
+        if (existingProgress?.status === 'locked') {
           await supabase
             .from('user_level_progress')
             .update({ status: 'current' })
@@ -268,11 +275,12 @@ export const useQuizData = () => {
     levelId,
     score,
     maxScore,
-    correctAnswers,
-    totalQuestions,
+    correct_answers,
+    total_questions,
   }: SaveProgressParams) => {
     if (!user) return;
-
+    // ... sisa kode Anda
+  
     // a) Simpan / update progress level
     const { error: progressError } = await supabase
       .from('user_level_progress')
@@ -280,15 +288,16 @@ export const useQuizData = () => {
         {
           user_id: user.id,
           level_id: levelId,
-          status: 'completed',    // Add status
+          status: 'completed',
           score,
           max_score: maxScore,
-          correct_answers: correctAnswers,
-          total_questions: totalQuestions,
+          correct_answers: correct_answers, // <-- PERBAIKAN DI SINI
+          total_questions: total_questions, // <-- PERBAIKAN DI SINI
           completed_at: new Date().toISOString(),
         },
         { onConflict: 'user_id, level_id' }
       );
+  
 
     if (progressError) throw progressError;
 
@@ -355,27 +364,48 @@ export const useQuizData = () => {
     return (data ?? []) as QuizLevel[];
   };
 
+  // ✅ FIX: filter progress by category via level_id list + filter by user_id
   const getUserLevelProgress = async (categoryId: string): Promise<UserLevelProgress[]> => {
     if (!user) return [];
-    // Join untuk filter progress by category
-    const { data } = await supabase
+
+    // 1) Ambil semua level.id untuk kategori ini
+    const { data: levelRows, error: levelErr } = await supabase
+      .from('quiz_levels')
+      .select('id')
+      .eq('category_id', categoryId);
+
+    if (levelErr) {
+      console.error('Error fetching levels for category:', levelErr);
+      return [];
+    }
+
+    const levelIds = (levelRows ?? []).map((l) => l.id);
+    if (levelIds.length === 0) return [];
+
+    // 2) Ambil progress user untuk level-level tsb
+    const { data, error } = await supabase
       .from('user_level_progress')
-      .select(
-        `id, 
-    level_id,
-    status,
-    score,
-    max_score,
-    correct_answers,
-    total_questions,
-    completed_at,
-    quiz_levels!inner(category_id)`
-      )
+      .select(`
+        id,
+        level_id,
+        status,
+        score,
+        max_score,
+        correct_answers,
+        total_questions,
+        completed_at,
+        created_at,
+        updated_at
+      `)
       .eq('user_id', user.id)
-      .eq('quiz_levels.category_id', categoryId);
+      .in('level_id', levelIds);
 
+    if (error) {
+      console.error('Error fetching user level progress:', error);
+      return [];
+    }
 
-return data ? (data as  UserLevelProgress[]) : [];
+    return data ? (data as UserLevelProgress[]) : [];
   };
 
   /** Ambil daftar level + points terakhir user untuk kategori tertentu */
@@ -394,10 +424,11 @@ return data ? (data as  UserLevelProgress[]) : [];
       const points = p?.score ?? p?.correct_answers ?? 0;
 
       let status: LevelScore['status'] = 'available';
-      if (p?.status === 'current') status = 'current';
-      if (p?.status === 'completed' || (p && (p.score > 0 || p.correct_answers > 0))) {
-        status = 'completed';
-      }
+if (p?.status === 'completed') {
+  status = 'completed';
+} else if (p?.status === 'current') {
+  status = 'current';
+}
 
       return {
         level_id: lvl.id,
@@ -464,6 +495,7 @@ return data ? (data as  UserLevelProgress[]) : [];
     userCategoryScores,
     userTotalScore,
     globalRank,
+    userLevelProgress,
     dailyRecommendation,
     loading,
 

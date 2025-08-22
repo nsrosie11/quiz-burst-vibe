@@ -43,10 +43,14 @@ const CategoryLevelsPage = ({
         console.log("📌 quizLevels:", quizLevels);
         console.log("📌 userProgress:", userProgress);
 
+        // bikin dictionary progress biar gampang akses
+        const progressMap = Object.fromEntries(
+          userProgress.map((p: any) => [p.level_id, p])
+        );
+
+        // gabungin data level + progress
         const levelsWithProgress: Level[] = quizLevels.map((level: any) => {
-          const progress = userProgress.find(
-            (p: any) => p.level_id === level.id
-          );
+          const progress = progressMap[level.id] || null;
 
           let status: Level["status"] = "available";
           if (progress) {
@@ -72,6 +76,7 @@ const CategoryLevelsPage = ({
           };
         });
 
+        console.log("📌 levelsWithProgress:", levelsWithProgress);
         setLevels(levelsWithProgress);
       } catch (error) {
         console.error("Failed to load levels:", error);
